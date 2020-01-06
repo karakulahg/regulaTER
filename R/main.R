@@ -9,17 +9,15 @@
 
 CountIntersect <-
   function(repeatMaskerFile,
-           inputPeakFile,
-           colName,
-           path = NULL) {
+           inputPeakFilesDir) {
+
+
     rmsk <- repeatMaskerFile
-    input.file <- inputPeakFile
 
     #### rearranges repeatMasker file for function convenience ####
 
     library(biomartr)
-    last <-
-      as.data.frame(stringr::str_split_fixed(rmsk$matching_class, "/", 2))
+    last <- as.data.frame(stringr::str_split_fixed(rmsk$matching_class, "/", 2))
     rmsk <-
       data.frame(
         "chr" = rmsk$qry_id,
@@ -36,15 +34,15 @@ CountIntersect <-
     #### converts repeatMasker data frame into GRanges object ####
 
     library(GenomicRanges)
-    gr.rmsk <-
-      with(rmsk, GenomicRanges::GRanges(chr, IRanges(start, end), strand = strand))
+    gr.rmsk <- with(rmsk, GenomicRanges::GRanges(chr, IRanges(start, end), strand = strand))
     values(gr.rmsk) <-
       DataFrame(
         RepeatName = rmsk$repeat_name,
         RepeatFamily = rmsk$repeat_family,
         RepeatType = rmsk$repeat_type
       )
-    gr.rmsk
+
+    input.file <- read.csv(inputPeakFilesDir, header=TRUE, stringsAsFactors=FALSE, sep = "\t")
 
     #### converts input peak data frame into GRanges object ####
 
@@ -76,31 +74,17 @@ CountIntersect <-
 
     df.rmsk.matched <- as.data.frame(gr.rmsk.matched)
     library(dplyr)
-    x <- df.rmsk.matched %>%
-      count(df.rmsk.matched[, colName])
+    x <- df.rmsk.matched %>% count(RepeatName)
+    colnames(x) <- c("RepeatName", "nRepeatName")
+    x.1 <- df.rmsk.matched %>% count(RepeatFamily)
+    colnames(x.1) <- c("RepeatFamily","nRepeatFamily")
+    x.2 <- df.rmsk.matched %>% count(RepeatType)
+    colnames(x.2) <- c("RepeatType", "nRepeatType")
 
-    #### writes output counts into .tsv file ####
+    all.counts <- list(x,x.1,x.2)
 
-    if (is.null(path)) {
-      write.table(
-        x,
-        paste0(colName, "-count.tsv"),
-        col.names = T,
-        row.names = F,
-        sep = "\t",
-        quote = F
-      )
-    } else {
-      write.table(
-        x,
-        path,
-        col.names = T,
-        row.names = F,
-        sep = "\t",
-        quote = F
-      )
-    }
+    ####
 
-  ####
+    return(all.counts)
 
   }
