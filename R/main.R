@@ -107,6 +107,8 @@ MakeShuffle<-function(inputPeakFile,genomeSizePath, numberOfShuffle=1,repeatMask
 
   gr.input <- inputPeakFile
 
+  observe.counts <- CountIntersect(repeatMaskerFile, gr.input)
+
   library(valr)
   genome <- read_genome(genomeSizePath)
   gr<-bed_shuffle(gr.input, genome)
@@ -126,9 +128,17 @@ MakeShuffle<-function(inputPeakFile,genomeSizePath, numberOfShuffle=1,repeatMask
       tmp <- MakeGrangeObj(tmp)
       tmp.counts <- CountIntersect(repeatMaskerFile, tmp)
 
-      Rname <- merge(Rname, as.data.frame(tmp.counts[[1]]),by = "RepeatName")
-      Rfamily <- merge(Rfamily, as.data.frame(tmp.counts[[2]]),by = "RepeatFamily")
-      Rtype <- merge(Rtype, as.data.frame(tmp.counts[[3]]),by = "RepeatType")
+      tmp.Rname <- as.data.frame(tmp.counts[[1]])
+      colnames(tmp.Rname) <- c("RepeatName",i)
+      tmp.Rfamily <- as.data.frame(tmp.counts[[2]])
+      colnames(tmp.Rfamily) <- c("RepeatFamily",i)
+      tmp.Rtype <- as.data.frame(tmp.counts[[3]])
+      colnames(tmp.Rtype) <- c("RepeatType",i)
+
+
+      Rname <- merge(Rname, tmp.Rname, by = "RepeatName")
+      Rfamily <- merge(Rfamily, tmp.Rfamily, by = "RepeatFamily")
+      Rtype <- merge(Rtype, tmp.Rtype, by = "RepeatType")
 
     }
 
