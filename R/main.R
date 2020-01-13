@@ -27,30 +27,56 @@ MakeGrangeObj <- function(inputPeakFile){
   return(gr.input)
 }
 
+#### rearranges repeatMasker file for function convenience ####
+FormattingRM <- function(rmsk){
+
+  library(biomartr)
+  last <- as.data.frame(stringr::str_split_fixed(rmsk$matching_class, "/", 2))
+  rmsk <-
+    data.frame(
+      "chr" = rmsk$qry_id,
+      "start" = rmsk$qry_start,
+      "end" = rmsk$qry_end,
+      "strand" = rmsk$matching_repeat,
+      "repeat_name" = rmsk$repeat_id,
+      "repeat_type" = last$V1,
+      "repeat_family" = last$V2
+    )
+  rmsk$strand <- as.character(rmsk$strand)
+  rmsk$strand <- replace(rmsk$strand, rmsk$strand == "C", "-")
+
+  hit <- rmsk$repeat_family == ""
+  rmsk <- rmsk[!hit,]
+
+  hit2 <- rmsk$repeat_type == "Unknown"
+  rmsk <- rmsk[!hit2,]
+
+  return(rmsk)
+}
+
+CountRM <- function(rmsk){
+
+  library(dplyr)
+  x <- rmsk %>% count(RepeatName)
+  colnames(x) <- c("RepeatName", "nRepeatName")
+
+  x1 <- rmsk %>% count(RepeatFamily)
+  colnames(x1) <- c("RepeatFamily","nRepeatFamily")
+
+  x2 <- rmsk %>% count(RepeatType)
+  colnames(x2) <- c("RepeatType", "nRepeatType")
+
+  rmsk.counts <- list(x,x1,x2)
+
+  return(rmsk.counts)
+}
 
 CountIntersect <-
   function(repeatMaskerFile,
            inputPeakFile) {
 
     gr.input <- inputPeakFile
-    rmsk <- repeatMaskerFile
-
-    #### rearranges repeatMasker file for function convenience ####
-
-    library(biomartr)
-    last <- as.data.frame(stringr::str_split_fixed(rmsk$matching_class, "/", 2))
-    rmsk <-
-      data.frame(
-        "chr" = rmsk$qry_id,
-        "start" = rmsk$qry_start,
-        "end" = rmsk$qry_end,
-        "strand" = rmsk$matching_repeat,
-        "repeat_name" = rmsk$repeat_id,
-        "repeat_type" = last$V1,
-        "repeat_family" = last$V2
-      )
-    rmsk$strand <- as.character(rmsk$strand)
-    rmsk$strand <- replace(rmsk$strand, rmsk$strand == "C", "-")
+    rmsk <- FormattingRM(repeatMaskerFile)
 
     #### converts repeatMasker data frame into GRanges object ####
 
@@ -83,15 +109,24 @@ CountIntersect <-
     #### converts matched GRanges object into data frame and counts instances of given column name ####
 
     df.rmsk.matched <- as.data.frame(gr.rmsk.matched)
+    diff.rName <- setdiff(rmsk$repeat_name, df.rmsk.matched$RepeatName)
+    diff.rFamily <- setdiff(rmsk$repeat_family, df.rmsk.matched$RepeatFamily)
+    diff.rType <- setdiff(rmsk$repeat_type, df.rmsk.matched$RepeatType)
+
     library(dplyr)
     x <- df.rmsk.matched %>% count(RepeatName)
     colnames(x) <- c("RepeatName", "nRepeatName")
-    x.1 <- df.rmsk.matched %>% count(RepeatFamily)
-    colnames(x.1) <- c("RepeatFamily","nRepeatFamily")
-    x.2 <- df.rmsk.matched %>% count(RepeatType)
-    colnames(x.2) <- c("RepeatType", "nRepeatType")
+    x <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
 
-    all.counts <- list(x,x.1,x.2)
+    x1 <- df.rmsk.matched %>% count(RepeatFamily)
+    colnames(x1) <- c("RepeatFamily","nRepeatFamily")
+    x1 <- rbind(x1, data.frame(RepeatFamily = diff.rFamily, nRepeatFamily = rep.int(0, length(diff.rFamily))))
+
+    x2 <- df.rmsk.matched %>% count(RepeatType)
+    colnames(x2) <- c("RepeatType", "nRepeatType")
+    x2 <- rbind(x2, data.frame(RepeatType = diff.rType, nRepeatType = rep.int(0, length(diff.rType))))
+
+    all.counts <- list(x,x1,x2)
 
     ####
 
@@ -101,9 +136,10 @@ CountIntersect <-
 
 
 
+
 #### get shuffle genome interval with using bedr shuffle function ####
 
-MakeShuffle<-function(inputPeakFile,genomeSizePath, numberOfShuffle=1,repeatMaskerFile ){
+MakeShuffle<-function(inputPeakFile, genomeSizePath, numberOfShuffle=1, repeatMaskerFile ){
 
   gr.input <- inputPeakFile
 
@@ -114,7 +150,7 @@ MakeShuffle<-function(inputPeakFile,genomeSizePath, numberOfShuffle=1,repeatMask
   gr<-bed_shuffle(gr.input, genome)
   colnames(gr)<-c("seqnames","start","end","strand")
   gr <- MakeGrangeObj(gr)
-  counts <- CountIntersect(repeatMaskerFile, gr)
+  expected.counts <- CountIntersect(repeatMaskerFile, gr)
   if(numberOfShuffle > 1){
 
     Rname <- as.data.frame(counts[[1]])
@@ -146,12 +182,17 @@ MakeShuffle<-function(inputPeakFile,genomeSizePath, numberOfShuffle=1,repeatMask
     Rfamily$Mean <- round(rowMeans(Rfamily[,c(2:ncol(Rfamily))]))
     Rtype$Mean <- round(rowMeans(Rtype[,c(2:ncol(Rtype))]))
 
-    counts <- list(Rname,Rfamily,Rtype)
+    expected.counts <- list(Rname,Rfamily,Rtype)
 
   }
 
+  rmsk <- FormattingRM(rmsk)
+  rmsk.counts <- CountRM(rmsk)
 
-  return(counts)
+  b1 <- binom.test(observe.counts[1]$nRepeatName, rmsk.counts[1]$nRepeatName, expected.counts[1]$Mean)
+
+  return(b1)
+
 }
 
   ####
