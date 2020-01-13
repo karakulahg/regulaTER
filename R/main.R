@@ -211,8 +211,7 @@ MakeShuffle<-function(inputPeakFile, genomeSizePath, numberOfShuffle=1, repeatMa
   b.rType <- mapply(test, all.RepeatType$observe, all.RepeatType$rmsk, (all.RepeatType$expected/all.RepeatType$rmsk))
 
 
-  binom.test.results <- list(b.rName, b.rFamily, b.rType)
-  names(binom.test.results) <- c("RepeatName", "RepeatFamily", "RepeatType")
+  binom.test.results <- list("RepeatName" = b.rName, "RepeatFamily" = b.rFamily, "RepeatType" = b.rType)
 
   return(binom.test.results)
 
