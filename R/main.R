@@ -57,16 +57,16 @@ FormattingRM <- function(rmsk){
 CountRM <- function(rmsk){
 
   library(dplyr)
-  x <- rmsk %>% count(RepeatName)
+  x <- rmsk %>% count(repeat_name)
   colnames(x) <- c("RepeatName", "nRepeatName")
 
-  x1 <- rmsk %>% count(RepeatFamily)
-  colnames(x1) <- c("RepeatFamily","nRepeatFamily")
+  x1 <- rmsk %>% count(repeat_type)
+  colnames(x1) <- c("RepeatType", "nRepeatType")
 
-  x2 <- rmsk %>% count(RepeatType)
-  colnames(x2) <- c("RepeatType", "nRepeatType")
+  x2 <- rmsk %>% count(repeat_family)
+  colnames(x2) <- c("RepeatFamily","nRepeatFamily")
 
-  rmsk.counts <- list(x,x1,x2)
+  rmsk.counts <- list(x,x2,x1)
 
   return(rmsk.counts)
 }
@@ -153,9 +153,9 @@ MakeShuffle<-function(inputPeakFile, genomeSizePath, numberOfShuffle=1, repeatMa
   expected.counts <- CountIntersect(repeatMaskerFile, gr)
   if(numberOfShuffle > 1){
 
-    Rname <- as.data.frame(counts[[1]])
-    Rfamily <- as.data.frame(counts[[2]])
-    Rtype <- as.data.frame(counts[[3]])
+    Rname <- as.data.frame(expected.counts[[1]])
+    Rfamily <- as.data.frame(expected.counts[[2]])
+    Rtype <- as.data.frame(expected.counts[[3]])
 
     for(i in 1:numberOfShuffle){
 
@@ -189,9 +189,32 @@ MakeShuffle<-function(inputPeakFile, genomeSizePath, numberOfShuffle=1, repeatMa
   rmsk <- FormattingRM(rmsk)
   rmsk.counts <- CountRM(rmsk)
 
-  b1 <- binom.test(observe.counts[1]$nRepeatName, rmsk.counts[1]$nRepeatName, expected.counts[1]$Mean)
 
-  return(b1)
+  all.RepeatName <- merge(as.data.frame(rmsk.counts[[1]]),as.data.frame(observe.counts[[1]]), by="RepeatName")
+  all.RepeatName <- merge(all.RepeatName, as.data.frame(expected.counts[[1]][,c(1,6)]), by="RepeatName")
+  colnames(all.RepeatName) <- c("RepeatName","rmsk","observe","expected")
+
+
+  all.RepeatFamily <- merge(as.data.frame(rmsk.counts[[2]]),as.data.frame(observe.counts[[2]]), by="RepeatFamily")
+  all.RepeatFamily <- merge(all.RepeatFamily, as.data.frame(expected.counts[[2]][,c(1,6)]), by="RepeatFamily")
+  colnames(all.RepeatFamily) <- c("RepeatFamily","rmsk","observe","expected")
+
+  all.RepeatType <- merge(as.data.frame(rmsk.counts[[3]]),as.data.frame(observe.counts[[3]]), by="RepeatType")
+  all.RepeatType <- merge(all.RepeatType, as.data.frame(expected.counts[[3]][,c(1,6)]), by="RepeatType")
+  colnames(all.RepeatType) <- c("RepeatType","rmsk","observe","expected")
+
+
+  test <- function(x, p, n){binom.test(x, p, n)}
+
+  b.rName <- mapply(test, all.RepeatName$observe, all.RepeatName$rmsk, (all.RepeatName$expected/all.RepeatName$rmsk))
+  b.rFamily <- mapply(test,all.RepeatFamily$observe, all.RepeatFamily$rmsk, (all.RepeatFamily$expected/all.RepeatFamily$rmsk))
+  b.rType <- mapply(test, all.RepeatType$observe, all.RepeatType$rmsk, (all.RepeatType$expected/all.RepeatType$rmsk))
+
+
+  binom.test.results <- list(b.rName, b.rFamily, b.rType)
+  names(binom.test.results) <- c("RepeatName", "RepeatFamily", "RepeatType")
+
+  return(binom.test.results)
 
 }
 
