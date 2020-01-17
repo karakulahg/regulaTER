@@ -134,23 +134,33 @@ CountIntersect <-
 
   }
 
-
-
-
-#### get shuffle genome interval with using bedr shuffle function ####
-
-MakeShuffle<-function(inputPeakFile, genomeSizePath, numberOfShuffle=1, repeatMaskerFile ){
+# list(Promoter = "../prom", exon = "../exon")
+ShufflePeaks <- function(peakFile, pathList, seed = 0){
 
   gr.input <- inputPeakFile
-
-  observe.counts <- CountIntersect(repeatMaskerFile, gr.input)
-
   library(valr)
   genome <- read_genome(genomeSizePath)
   gr<-bed_shuffle(gr.input, genome)
   colnames(gr)<-c("seqnames","start","end","strand")
   gr <- MakeGrangeObj(gr)
+
+  return(gr)
+
+}
+
+
+
+
+#### get shuffle genome interval with using bedr shuffle function ####
+
+EnrichPARs <- function(inputPeakFile, ShuffledPeak, genomeSizePath, numberOfShuffle=1, repeatMaskerFile ){
+
+  gr.input <- inputPeakFile
+  observe.counts <- CountIntersect(repeatMaskerFile, gr.input)
+
+  gr <- ShuffledPeak
   expected.counts <- CountIntersect(repeatMaskerFile, gr)
+
   if(numberOfShuffle > 1){
 
     Rname <- as.data.frame(expected.counts[[1]])
