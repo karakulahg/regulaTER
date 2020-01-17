@@ -190,34 +190,101 @@ MakeShuffle<-function(inputPeakFile, genomeSizePath, numberOfShuffle=1, repeatMa
   rmsk.counts <- CountRM(rmsk)
 
 
-  all.RepeatName <- merge(as.data.frame(rmsk.counts[[1]]),as.data.frame(observe.counts[[1]]), by="RepeatName")
-  all.RepeatName <- merge(all.RepeatName, as.data.frame(expected.counts[[1]][,c(1,6)]), by="RepeatName")
+  all.RepeatName <- merge(as.data.frame(rmsk.counts[[1]]),as.data.frame(observe.counts[[1]]), by = "RepeatName")
+  all.RepeatName <- merge(all.RepeatName, as.data.frame(expected.counts[[1]][,c(1,6)]), by = "RepeatName")
   colnames(all.RepeatName) <- c("RepeatName","rmsk","observe","expected")
 
 
-  all.RepeatFamily <- merge(as.data.frame(rmsk.counts[[2]]),as.data.frame(observe.counts[[2]]), by="RepeatFamily")
-  all.RepeatFamily <- merge(all.RepeatFamily, as.data.frame(expected.counts[[2]][,c(1,6)]), by="RepeatFamily")
+  all.RepeatFamily <- merge(as.data.frame(rmsk.counts[[2]]),as.data.frame(observe.counts[[2]]), by = "RepeatFamily")
+  all.RepeatFamily <- merge(all.RepeatFamily, as.data.frame(expected.counts[[2]][,c(1,6)]), by = "RepeatFamily")
   colnames(all.RepeatFamily) <- c("RepeatFamily","rmsk","observe","expected")
 
-  all.RepeatType <- merge(as.data.frame(rmsk.counts[[3]]),as.data.frame(observe.counts[[3]]), by="RepeatType")
-  all.RepeatType <- merge(all.RepeatType, as.data.frame(expected.counts[[3]][,c(1,6)]), by="RepeatType")
+  all.RepeatType <- merge(as.data.frame(rmsk.counts[[3]]),as.data.frame(observe.counts[[3]]), by = "RepeatType")
+  all.RepeatType <- merge(all.RepeatType, as.data.frame(expected.counts[[3]][,c(1,6)]), by = "RepeatType")
   colnames(all.RepeatType) <- c("RepeatType","rmsk","observe","expected")
 
 
   test <- function(x, p, n){binom.test(x, p, n)}
 
   b.rName <- mapply(test, all.RepeatName$observe, all.RepeatName$rmsk, (all.RepeatName$expected/all.RepeatName$rmsk))
+  all.RepeatName$p.value <- do.call(rbind, b.rName["p.value",])
+
   b.rFamily <- mapply(test,all.RepeatFamily$observe, all.RepeatFamily$rmsk, (all.RepeatFamily$expected/all.RepeatFamily$rmsk))
+  all.RepeatFamily$p.value <- do.call(rbind, b.rFamily["p.value",])
+
   b.rType <- mapply(test, all.RepeatType$observe, all.RepeatType$rmsk, (all.RepeatType$expected/all.RepeatType$rmsk))
+  all.RepeatType$p.value <- do.call(rbind, b.rType["p.value",])
 
 
-  binom.test.results <- list("RepeatName" = b.rName, "RepeatFamily" = b.rFamily, "RepeatType" = b.rType)
+  binom.test.results <- list("RepeatName" = subset(all.RepeatName, p.value < 1e-03 & observe > expected), "RepeatFamily" = subset(all.RepeatFamily, p.value < 1e-03 & observe > expected), "RepeatType" = subset(all.RepeatType, p.value < 1e-03 & observe > expected))
 
   return(binom.test.results)
 
 }
 
+
   ####
+
+
+homer <- function(df ,repeatMaskerFİle, class = "name", outDir){
+
+  rmsk <- repeatMaskerFile
+  df <- binom.test.results
+
+  name <- rmsk[which(rmsk$repeat_name %in% as.vector(binom.test.results$RepeatName$RepeatName)),]
+  family <- rmsk[which(rmsk$repeat_family %in% as.vector(binom.test.results$RepeatFamily$RepeatFamily)),]
+  type <- rmsk[which(rmsk$repeat_type %in% as.vector(binom.test.results$RepeatType$RepeatType)),]
+
+#   all.annot <- rbind(name,family,type)
+#   all.annot$ID <- row.names(all.annot)
+#
+#   df <- all.annot[,c(1,2,3,8,5,4)]
+
+  name$ID <- row.names(name)
+  df.name <- name[,c(1,2,3,8,5,4)]
+
+  family$ID <- row.names(family)
+  df.family <- family[,c(1,2,3,8,5,4)]
+
+  type$ID <- row.names(type)
+  df.type <- type[,c(1,2,3,8,5,4)]
+
+
+  write.table(df.name, file = paste0(outDir,"/repeatName.bed"), quote=F, sep="\t", row.names=F, col.names=F,)
+  write.table(df.family, file = paste0(outDir,"/repeatFamily.bed"), quote=F, sep="\t", row.names=F, col.names=F)
+  write.table(df.type, file = paste0(outDir,"/repeatType.bed"), quote=F, sep="\t", row.names=F, col.names=F)
+
+
+
+  if(nrow(df.name) > 0){
+
+    dir.create(path = paste0(outDir,"/Name"))
+    system(paste("findMotifsGenome.pl ",paste0(outDir,"/Name/repeatName.bed"), "hg19 . -size 100 "))
+
+  }
+
+  if(nrow(df.family) > 0){
+
+    dir.create(path = paste0(outDir,"/Family"))
+    system(paste("findMotifsGenome.pl ",paste0(outDir,"/Family/repeatFamily.bed"), "hg19 . -size 100 "))
+
+  }
+
+  if(nrow(df.type) > 0){
+
+    dir.create(path = paste0(outDir,"/Type"))
+    system(paste("findMotifsGenome.pl ",paste0(outDir,"/Type/repeatType.bed"), "hg19 . -size 100 "))
+
+  }
+
+
+
+
+
+
+}
+
+
 
 
 
