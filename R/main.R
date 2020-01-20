@@ -134,14 +134,59 @@ CountIntersect <-
 
   }
 
-# list(Promoter = "../prom", exon = "../exon")
+
+pathList <- list("Promoter" = "/home/nazmiye/Desktop/BIP/test/hg19.Promoter",
+     "Exon" = "/home/nazmiye/Desktop/BIP/test/hg19.Exons",
+     "Intron" = "/home/nazmiye/Desktop/BIP/test/hg19.Introns",
+     "5UTR" = "/home/nazmiye/Desktop/BIP/test/hg19.5Prime",
+     "3UTR" = "/home/nazmiye/Desktop/BIP/test/hg19.3Prime",
+     "Downstream" = "/home/nazmiye/Desktop/BIP/test/hg19.Downstream",
+     "genomeSizePath" = "/home/nazmiye/Desktop/BIP/test/hg19.chrom.sizes"
+  )
+
+
 ShufflePeaks <- function(peakFile, pathList, seed = 0){
 
   gr.input <- inputPeakFile
-  library(valr)
-  genome <- read_genome(genomeSizePath)
-  gr<-bed_shuffle(gr.input, genome)
-  colnames(gr)<-c("seqnames","start","end","strand")
+
+  gr.Promoter <- gr.input[grepl('Promoter', gr.input$annotation),]
+  gr.Exon <- gr.input[grepl('Exon', gr.input$annotation),]
+  gr.Intron <- gr.input[grepl('Intron', gr.input$annotation),]
+  gr.5UTR <- gr.input[grepl("5' UTR", gr.input$annotation),]
+  gr.3UTR <- gr.input[grepl("3' UTR", gr.input$annotation),]
+  gr.Intergenic <- gr.input[grepl('Intergenic', gr.input$annotation),]
+  gr.Downstream <- gr.Intron <- gr.input[grepl('Downstream', gr.input$annotation),]
+
+#   library(valr)
+#   genome <- read_genome(genomeSizePath)
+
+  write.table(as.data.frame(gr.Promoter), file="inc.Promoter.bed", quote=F, sep="\t", row.names=F, col.names=F)
+  system(paste(" bedtools shuffle -i ",pathList$Promoter," -g ",pathList$genomeSizePath," -incl inc.Promoter.bed > shuffled.promoters "))
+
+  sh.Promoter <- bed_shuffle(gr.Promoter, genome, incl = tbl.promoter)
+  colnames(sh.Promoter)<-c("seqnames","start","end","strand")
+
+  sh.Exon <- bed_shuffle(gr.Exon, genome)
+  colnames(sh.Exon)<-c("seqnames","start","end","strand")
+
+  sh.Intron <- bed_shuffle(gr.Intron, genome)
+  colnames(sh.Intron)<-c("seqnames","start","end","strand")
+
+  sh.5UTR <- bed_shuffle(gr.5UTR, genome)
+  colnames(sh.5UTR)<-c("seqnames","start","end","strand")
+
+  sh.3UTR <- bed_shuffle(gr.3UTR, genome)
+  colnames(sh.3UTR)<-c("seqnames","start","end","strand")
+
+  sh.Intergenic <- bed_shuffle(gr.Intergenic, genome)
+  colnames(sh.Intergenic)<-c("seqnames","start","end","strand")
+
+  sh.Downstream <- bed_shuffle(gr.Downstream, genome)
+  colnames(sh.Downstream)<-c("seqnames","start","end","strand")
+
+
+
+
   gr <- MakeGrangeObj(gr)
 
   return(gr)
