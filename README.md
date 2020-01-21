@@ -3,6 +3,7 @@
 # library(GenomicRanges)
 # library(dplyr)
 # library(valr)
+# library(ToolX)
 
 #### Tutorial Steps ####
 
@@ -11,8 +12,20 @@
 
 # gr.peak <- MakeGrangeObj(inputPeakFile = input.file)
 
-# peak.repeat.counts <- CountIntersect(repeatMaskerFile = rmsk, inputPeakFile = gr.peak)
+##### peak.repeat.counts <- CountIntersect(repeatMaskerFile = rmsk, inputPeakFile = gr.peak)
 
-# shuffled.peak.repeat.counts <- MakeShuffle(inputPeakFile = gr.peak, genomeSizePath = "../test/hg19.chrom.sizes", numberOfShuffle = 3, repeatMaskerFile = rmsk)
+# pathList <- list("Promoter" = "/home/nazmiye/Desktop/BIP/test/hg19.Promoter",
+#      "Exon" = "/home/nazmiye/Desktop/BIP/test/hg19.Exons",
+#      "Intron" = "/home/nazmiye/Desktop/BIP/test/hg19.Introns",
+#      "5UTR" = "/home/nazmiye/Desktop/BIP/test/hg19.5Prime",
+#      "3UTR" = "/home/nazmiye/Desktop/BIP/test/hg19.3Prime",
+#      "Downstream" = "/home/nazmiye/Desktop/BIP/test/hg19.Downstream",
+#      "genomeSizePath" = "/home/nazmiye/Desktop/BIP/test/hg19.chrom.sizes"
+#   )
+
+
+# test <- EnrichPARs(inputPeakFile = input.file, ShuffledPeak = gr.sh, pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = rmsk)
+
+
 
 
