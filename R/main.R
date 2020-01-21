@@ -135,19 +135,10 @@ CountIntersect <-
   }
 
 
-pathList <- list("Promoter" = "/home/nazmiye/Desktop/BIP/test/hg19.Promoter",
-     "Exon" = "/home/nazmiye/Desktop/BIP/test/hg19.Exons",
-     "Intron" = "/home/nazmiye/Desktop/BIP/test/hg19.Introns",
-     "5UTR" = "/home/nazmiye/Desktop/BIP/test/hg19.5Prime",
-     "3UTR" = "/home/nazmiye/Desktop/BIP/test/hg19.3Prime",
-     "Downstream" = "/home/nazmiye/Desktop/BIP/test/hg19.Downstream",
-     "genomeSizePath" = "/home/nazmiye/Desktop/BIP/test/hg19.chrom.sizes"
-  )
-
 
 ShufflePeaks <- function(peakFile, pathList, seed = 0){
 
-  gr.input <- inputPeakFile
+  gr.input <- MakeGrangeObj(inputPeakFile = peakFile)
 
   gr.Promoter <- gr.input[grepl('Promoter', gr.input$annotation),]
   gr.Exon <- gr.input[grepl('Exon', gr.input$annotation),]
@@ -157,37 +148,41 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
   gr.Intergenic <- gr.input[grepl('Intergenic', gr.input$annotation),]
   gr.Downstream <- gr.Intron <- gr.input[grepl('Downstream', gr.input$annotation),]
 
-#   library(valr)
-#   genome <- read_genome(genomeSizePath)
 
-  write.table(as.data.frame(gr.Promoter), file="inc.Promoter.bed", quote=F, sep="\t", row.names=F, col.names=F)
-  system(paste(" bedtools shuffle -i ",pathList$Promoter," -g ",pathList$genomeSizePath," -incl inc.Promoter.bed > shuffled.promoters "))
+  write.table(as.data.frame(gr.Promoter), file="Promoter.bed", quote=F, sep="\t", row.names=F, col.names=F)
+  system(paste(" bedtools shuffle -i Promoter.bed -g ",pathList$genomeSizePath," -incl ",pathList$Promoter," > shuffled.promoters "))
+  sh.promoter <- read.csv("shuffled.promoters", header = F, sep = "\t")
 
-  sh.Promoter <- bed_shuffle(gr.Promoter, genome, incl = tbl.promoter)
-  colnames(sh.Promoter)<-c("seqnames","start","end","strand")
+  write.table(as.data.frame(gr.Exon), file="Exon.bed", quote=F, sep="\t", row.names=F, col.names=F)
+  system(paste(" bedtools shuffle -i Exon.bed -g ",pathList$genomeSizePath," -incl ",pathList$Exon," > shuffled.exons "))
+  sh.exon <- read.csv("shuffled.exons", header = F, sep = "\t")
 
-  sh.Exon <- bed_shuffle(gr.Exon, genome)
-  colnames(sh.Exon)<-c("seqnames","start","end","strand")
+  write.table(as.data.frame(gr.Intron), file="Intron.bed", quote=F, sep="\t", row.names=F, col.names=F)
+  system(paste(" bedtools shuffle -i Intron.bed -g ",pathList$genomeSizePath," -incl ",pathList$Intron," > shuffled.introns "))
+  sh.intron <- read.csv("shuffled.introns", header = F, sep = "\t")
 
-  sh.Intron <- bed_shuffle(gr.Intron, genome)
-  colnames(sh.Intron)<-c("seqnames","start","end","strand")
+  write.table(as.data.frame(gr.5UTR), file="FiveUTR.bed", quote=F, sep="\t", row.names=F, col.names=F)
+  system(paste(" bedtools shuffle -i FiveUTR.bed -g ",pathList$genomeSizePath," -incl ",pathList$`5UTR`," > shuffled.5UTR "))
+  sh.5UTR <- read.csv("shuffled.5UTR", header = F, sep = "\t")
 
-  sh.5UTR <- bed_shuffle(gr.5UTR, genome)
-  colnames(sh.5UTR)<-c("seqnames","start","end","strand")
+  write.table(as.data.frame(gr.3UTR), file="ThreeUTR.bed", quote=F, sep="\t", row.names=F, col.names=F)
+  system(paste(" bedtools shuffle -i ThreeUTR.bed -g ",pathList$genomeSizePath," -incl ",pathList$`3UTR`," > shuffled.3UTR "))
+  sh.3UTR <- read.csv("shuffled.3UTR", header = F, sep = "\t")
 
-  sh.3UTR <- bed_shuffle(gr.3UTR, genome)
-  colnames(sh.3UTR)<-c("seqnames","start","end","strand")
+  write.table(as.data.frame(gr.Downstream), file="Downstream.bed", quote=F, sep="\t", row.names=F, col.names=F)
+  system(paste(" bedtools shuffle -i Downstream.bed -g ",pathList$genomeSizePath," -incl ",pathList$Downstream," > shuffled.downstream "))
+  sh.downstream <- read.csv("shuffled.downstream", header = F, sep = "\t")
 
-  sh.Intergenic <- bed_shuffle(gr.Intergenic, genome)
-  colnames(sh.Intergenic)<-c("seqnames","start","end","strand")
-
-  sh.Downstream <- bed_shuffle(gr.Downstream, genome)
-  colnames(sh.Downstream)<-c("seqnames","start","end","strand")
-
-
+  write.table(as.data.frame(gr.Intergenic), file="Intergenic.bed", quote=F, sep="\t", row.names=F, col.names=F)
+  system(paste(" bedtools shuffle -i Intergenic.bed -g ",pathList$genomeSizePath," -excl ",pathList$Promoter,
+               " -excl ",pathList$Exon," -excl ",pathList$Intron," -excl ",pathList$`5UTR`," -excl ",pathList$`3UTR`,
+               " -excl ",pathList$Downstream," > shuffled.intergenic "))
+  sh.intergenic <- read.csv("shuffled.intergenic", header = F, sep = "\t")
 
 
-  gr <- MakeGrangeObj(gr)
+  all.shuffeledAnnots <- rbind(sh.promoter, sh.exon, sh.intron, sh.5UTR, sh.3UTR, sh.intergenic, sh.downstream)
+  colnames(all.shuffeledAnnots) <- colnames(peakFile)
+  gr <- MakeGrangeObj(all.shuffeledAnnots)
 
   return(gr)
 
@@ -198,12 +193,12 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
 
 #### get shuffle genome interval with using bedr shuffle function ####
 
-EnrichPARs <- function(inputPeakFile, ShuffledPeak, genomeSizePath, numberOfShuffle=1, repeatMaskerFile ){
+EnrichPARs <- function(inputPeakFile, ShuffledPeak, pathList, numberOfShuffle=1, repeatMaskerFile ){
 
-  gr.input <- inputPeakFile
+  gr.input <- MakeGrangeObj(inputPeakFile = inputPeakFile)
   observe.counts <- CountIntersect(repeatMaskerFile, gr.input)
 
-  gr <- ShuffledPeak
+  gr <- ShufflePeaks(inputPeakFile, pathList)
   expected.counts <- CountIntersect(repeatMaskerFile, gr)
 
   if(numberOfShuffle > 1){
@@ -214,9 +209,7 @@ EnrichPARs <- function(inputPeakFile, ShuffledPeak, genomeSizePath, numberOfShuf
 
     for(i in 1:numberOfShuffle){
 
-      tmp <- bed_shuffle(gr.input, genome)
-      colnames(tmp)<-c("seqnames","start","end","strand")
-      tmp <- MakeGrangeObj(tmp)
+      tmp <-  ShufflePeaks(inputPeakFile, pathList)
       tmp.counts <- CountIntersect(repeatMaskerFile, tmp)
 
       tmp.Rname <- as.data.frame(tmp.counts[[1]])
@@ -281,7 +274,7 @@ EnrichPARs <- function(inputPeakFile, ShuffledPeak, genomeSizePath, numberOfShuf
   ####
 
 
-homer <- function(df ,repeatMaskerFİle, class = "name", outDir){
+FindMotifs <- function(df ,repeatMaskerFİle, outDir, homerPath){
 
   rmsk <- repeatMaskerFile
   df <- binom.test.results
@@ -309,26 +302,25 @@ homer <- function(df ,repeatMaskerFİle, class = "name", outDir){
   write.table(df.family, file = paste0(outDir,"/repeatFamily.bed"), quote=F, sep="\t", row.names=F, col.names=F)
   write.table(df.type, file = paste0(outDir,"/repeatType.bed"), quote=F, sep="\t", row.names=F, col.names=F)
 
-
+  library(marge)
+  options("homer_path" = homerPath)
+  options(stringsAsFactors = F)
 
   if(nrow(df.name) > 0){
 
-    dir.create(path = paste0(outDir,"/Name"))
-    system(paste("findMotifsGenome.pl ",paste0(outDir,"/Name/repeatName.bed"), "hg19 . -size 100 "))
+    find_motifs_genome(df.name, "margeOutput/asRepeatName", "hg19", overwrite = T)
 
   }
 
   if(nrow(df.family) > 0){
 
-    dir.create(path = paste0(outDir,"/Family"))
-    system(paste("findMotifsGenome.pl ",paste0(outDir,"/Family/repeatFamily.bed"), "hg19 . -size 100 "))
+    find_motifs_genome(df.family, "margeOutput/asRepeatFamily", "hg19", overwrite = T)
 
   }
 
   if(nrow(df.type) > 0){
 
-    dir.create(path = paste0(outDir,"/Type"))
-    system(paste("findMotifsGenome.pl ",paste0(outDir,"/Type/repeatType.bed"), "hg19 . -size 100 "))
+    find_motifs_genome(df.type, "margeOutput/asRepeatType", "hg19", overwrite = T)
 
   }
 
