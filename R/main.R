@@ -325,10 +325,6 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
   }
 
 
-
-
-
-
 }
 
 

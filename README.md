@@ -27,7 +27,6 @@
 
 # test <- EnrichPARs(inputPeakFile = input.file, pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = rmsk)
 
-# 
-
+# FindMotifs(df = test, repeatMaskerFile = rmsk, outDir = "../test/", homerPath = "~/Downloads/Tools/homer/")
 
 
