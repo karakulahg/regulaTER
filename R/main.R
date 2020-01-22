@@ -193,7 +193,7 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
 
 #### get shuffle genome interval with using bedr shuffle function ####
 
-EnrichPARs <- function(inputPeakFile, ShuffledPeak, pathList, numberOfShuffle=1, repeatMaskerFile ){
+EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerFile ){
 
   gr.input <- MakeGrangeObj(inputPeakFile = inputPeakFile)
   observe.counts <- CountIntersect(repeatMaskerFile, gr.input)
@@ -239,16 +239,16 @@ EnrichPARs <- function(inputPeakFile, ShuffledPeak, pathList, numberOfShuffle=1,
 
 
   all.RepeatName <- merge(as.data.frame(rmsk.counts[[1]]),as.data.frame(observe.counts[[1]]), by = "RepeatName")
-  all.RepeatName <- merge(all.RepeatName, as.data.frame(expected.counts[[1]][,c(1,6)]), by = "RepeatName")
+  all.RepeatName <- merge(all.RepeatName, as.data.frame(expected.counts[[1]][,c(1,ncol(expected.counts[[1]]))]), by = "RepeatName")
   colnames(all.RepeatName) <- c("RepeatName","rmsk","observe","expected")
 
 
   all.RepeatFamily <- merge(as.data.frame(rmsk.counts[[2]]),as.data.frame(observe.counts[[2]]), by = "RepeatFamily")
-  all.RepeatFamily <- merge(all.RepeatFamily, as.data.frame(expected.counts[[2]][,c(1,6)]), by = "RepeatFamily")
+  all.RepeatFamily <- merge(all.RepeatFamily, as.data.frame(expected.counts[[2]][,c(1,ncol(expected.counts[[1]]))]), by = "RepeatFamily")
   colnames(all.RepeatFamily) <- c("RepeatFamily","rmsk","observe","expected")
 
   all.RepeatType <- merge(as.data.frame(rmsk.counts[[3]]),as.data.frame(observe.counts[[3]]), by = "RepeatType")
-  all.RepeatType <- merge(all.RepeatType, as.data.frame(expected.counts[[3]][,c(1,6)]), by = "RepeatType")
+  all.RepeatType <- merge(all.RepeatType, as.data.frame(expected.counts[[3]][,c(1,ncol(expected.counts[[1]]))]), by = "RepeatType")
   colnames(all.RepeatType) <- c("RepeatType","rmsk","observe","expected")
 
 
@@ -274,10 +274,10 @@ EnrichPARs <- function(inputPeakFile, ShuffledPeak, pathList, numberOfShuffle=1,
   ####
 
 
-FindMotifs <- function(df ,repeatMaskerFİle, outDir, homerPath){
+FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
 
-  rmsk <- repeatMaskerFile
-  df <- binom.test.results
+  rmsk <- FormattingRM(repeatMaskerFile)
+  binom.test.results <- df
 
   name <- rmsk[which(rmsk$repeat_name %in% as.vector(binom.test.results$RepeatName$RepeatName)),]
   family <- rmsk[which(rmsk$repeat_family %in% as.vector(binom.test.results$RepeatFamily$RepeatFamily)),]
@@ -308,19 +308,19 @@ FindMotifs <- function(df ,repeatMaskerFİle, outDir, homerPath){
 
   if(nrow(df.name) > 0){
 
-    find_motifs_genome(df.name, "margeOutput/asRepeatName", "hg19", overwrite = T)
+    find_motifs_genome(df.name, paste0(outDir,"/margeOutput/asRepeatName"), "hg19", overwrite = T)
 
   }
 
   if(nrow(df.family) > 0){
 
-    find_motifs_genome(df.family, "margeOutput/asRepeatFamily", "hg19", overwrite = T)
+    find_motifs_genome(df.family, paste0(outDir,"/margeOutput/asRepeatFamily"), "hg19", overwrite = T)
 
   }
 
   if(nrow(df.type) > 0){
 
-    find_motifs_genome(df.type, "margeOutput/asRepeatType", "hg19", overwrite = T)
+    find_motifs_genome(df.type, paste0(outDir,"/margeOutput/asRepeatType"), "hg19", overwrite = T)
 
   }
 

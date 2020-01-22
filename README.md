@@ -24,8 +24,10 @@
 #   )
 
 
-# test <- EnrichPARs(inputPeakFile = input.file, ShuffledPeak = gr.sh, pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = rmsk)
 
+# test <- EnrichPARs(inputPeakFile = input.file, pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = rmsk)
+
+# 
 
 
 
