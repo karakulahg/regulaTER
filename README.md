@@ -48,12 +48,12 @@ input.file <- read.csv("../test/Annotated-Sorted_09_018U_004MSoton_MCF7-ZEB1_uni
 ```
 
 pathList <- list("Promoter" = "/home/nazmiye/Desktop/BIP/test/hg19.Promoter",
-     "Exon" = "/home/nazmiye/Desktop/BIP/test/hg19.Exons",
-     "Intron" = "/home/nazmiye/Desktop/BIP/test/hg19.Introns",
-     "5UTR" = "/home/nazmiye/Desktop/BIP/test/hg19.5Prime",
-     "3UTR" = "/home/nazmiye/Desktop/BIP/test/hg19.3Prime",
-     "Downstream" = "/home/nazmiye/Desktop/BIP/test/hg19.Downstream",
-     "genomeSizePath" = "/home/nazmiye/Desktop/BIP/test/hg19.chrom.sizes"
+     "Exon" = "../test/hg19.Exons",
+     "Intron" = "../test/hg19.Introns",
+     "5UTR" = "../test/hg19.5Prime",
+     "3UTR" = "../test/hg19.3Prime",
+     "Downstream" = "../test/hg19.Downstream",
+     "genomeSizePath" = "../test/hg19.chrom.sizes"
   )
 
 
