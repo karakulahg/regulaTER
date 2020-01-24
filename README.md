@@ -46,7 +46,7 @@ rmsk<-biomartr::read_rm("../test/hg19.fa.out") # repeat annotation
 input.file <- read.csv("../test/Annotated-Sorted_09_018U_004MSoton_MCF7-ZEB1_unind_Pol2_hs_i91_peaks.narrowPeak.tsv", header=TRUE, stringsAsFactors=FALSE, sep = "\t")
 
 ```
-3. Using the Table Browser tool of UCSC Genome Browser, or another similar method, generate BED files for the following genomic regions, as compatible with ChIPseeker annotations. Promoter region is defined as 3000 bases upstream of the gene region, while Downstream region is defined as 3000 bases downstream.
+3. Using the Table Browser tool of UCSC Genome Browser, or another similar method, generate BED files for the following genomic regions, as compatible with ChIPseeker annotations. Promoter region is defined as 3000 bases upstream of the gene region, while Downstream region is defined as 3000 bases downstream. The genomeSizePath should point to a file with two columns, with the first column corresponding to chromosome names in order, and the second column corresponding to chromosome size.
 ```
 
 pathList <- list("Promoter" = "/home/nazmiye/Desktop/BIP/test/hg19.Promoter",
