@@ -274,7 +274,7 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
 }
 
 
-  ####
+####
 
 
 FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
@@ -286,10 +286,10 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
   family <- rmsk[which(rmsk$repeat_family %in% as.vector(binom.test.results$RepeatFamily$RepeatFamily)),]
   type <- rmsk[which(rmsk$repeat_type %in% as.vector(binom.test.results$RepeatType$RepeatType)),]
 
-#   all.annot <- rbind(name,family,type)
-#   all.annot$ID <- row.names(all.annot)
-#
-#   df <- all.annot[,c(1,2,3,8,5,4)]
+  #   all.annot <- rbind(name,family,type)
+  #   all.annot$ID <- row.names(all.annot)
+  #
+  #   df <- all.annot[,c(1,2,3,8,5,4)]
 
   name$ID <- row.names(name)
   df.name <- name[,c(1,2,3,8,5,4)]
@@ -329,7 +329,6 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
 
 
 }
-
 
 
 
