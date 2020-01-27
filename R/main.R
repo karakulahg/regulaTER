@@ -73,7 +73,7 @@ CountRM <- function(rmsk){
 
 CountIntersect <-
   function(repeatMaskerFile,
-           inputPeakFile) {
+           inputPeakFile, format, minoverlap=0L) {
 
     gr.input <- inputPeakFile
     rmsk <- FormattingRM(repeatMaskerFile)
@@ -91,14 +91,23 @@ CountIntersect <-
 
 
     #### converts gr.input range into single nucleotide at summit location ####
-    if(ncol(elementMetadata(gr.input))!= 0){
-      GenomicRanges::start(gr.input) <- GenomicRanges::start(gr.input) + gr.input$peak
-      GenomicRanges::end(gr.input) <- GenomicRanges::start(gr.input) + 1
+
+    if(format == "narrow"){
+
+      if(ncol(elementMetadata(gr.input))!= 0){
+        GenomicRanges::start(gr.input) <- GenomicRanges::start(gr.input) + gr.input$peak
+        GenomicRanges::end(gr.input) <- GenomicRanges::start(gr.input) + 1
+      }
+
     }
 
     #### finds repeat ranges with overlapping summits ####
 
-    m <- GenomicRanges::findOverlaps(gr.rmsk, gr.input, ignore.strand = TRUE)
+    if(format == "braod"){
+      m <- GenomicRanges::findOverlaps(gr.rmsk, gr.input, ignore.strand = TRUE, minoverlap = minoverlap)
+    }else{
+      m <- GenomicRanges::findOverlaps(gr.rmsk, gr.input, ignore.strand = TRUE)
+    }
     gr.rmsk.matched <- gr.rmsk[queryHits(m)]
 
     #### adds the metadata from gr2 to GRanges of intersecting peaks ####
