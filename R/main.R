@@ -205,7 +205,7 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
 EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerFile, format, minoverlap=0L){
 
   gr.input <- MakeGrangeObj(inputPeakFile = inputPeakFile)
-  observe.counts <- CountIntersect(repeatMaskerFile, gr.input)
+  observe.counts <- CountIntersect(repeatMaskerFile, gr.input,format, minoverlap)
 
   gr <- ShufflePeaks(inputPeakFile, pathList)
   expected.counts <- CountIntersect(repeatMaskerFile, gr, format, minoverlap)
