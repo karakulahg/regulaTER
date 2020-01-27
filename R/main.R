@@ -202,13 +202,13 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
 
 #### get shuffle genome interval with using bedr shuffle function ####
 
-EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerFile ){
+EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerFile, format, minoverlap=0L){
 
   gr.input <- MakeGrangeObj(inputPeakFile = inputPeakFile)
   observe.counts <- CountIntersect(repeatMaskerFile, gr.input)
 
   gr <- ShufflePeaks(inputPeakFile, pathList)
-  expected.counts <- CountIntersect(repeatMaskerFile, gr)
+  expected.counts <- CountIntersect(repeatMaskerFile, gr, format, minoverlap)
 
   if(numberOfShuffle > 1){
 
@@ -219,7 +219,7 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
     for(i in 1:numberOfShuffle){
 
       tmp <-  ShufflePeaks(inputPeakFile, pathList)
-      tmp.counts <- CountIntersect(repeatMaskerFile, tmp)
+      tmp.counts <- CountIntersect(repeatMaskerFile, tmp, format, minoverlap)
 
       tmp.Rname <- as.data.frame(tmp.counts[[1]])
       colnames(tmp.Rname) <- c("RepeatName",i)
