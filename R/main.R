@@ -265,15 +265,15 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
 
   b.rName <- mapply(test, all.RepeatName$observe, all.RepeatName$rmsk, (all.RepeatName$expected/all.RepeatName$rmsk))
   all.RepeatName$p.value <- do.call(rbind, b.rName["p.value",])
-  all.RepeatName$p.adjust.value <- p.adjust(all.RepeatName$p.value, method = "fdr", n = length(p))
+  all.RepeatName$p.adjust.value <- p.adjust(all.RepeatName$p.value, method = "fdr", n = length(all.RepeatName$p.value))
 
   b.rFamily <- mapply(test,all.RepeatFamily$observe, all.RepeatFamily$rmsk, (all.RepeatFamily$expected/all.RepeatFamily$rmsk))
   all.RepeatFamily$p.value <- do.call(rbind, b.rFamily["p.value",])
-  all.RepeatFamily$p.adjust.value <- p.adjust(all.RepeatFamily$p.value, method = "fdr", n = length(p))
+  all.RepeatFamily$p.adjust.value <- p.adjust(all.RepeatFamily$p.value, method = "fdr", n = length(all.RepeatFamily$p.value))
 
   b.rType <- mapply(test, all.RepeatType$observe, all.RepeatType$rmsk, (all.RepeatType$expected/all.RepeatType$rmsk))
   all.RepeatType$p.value <- do.call(rbind, b.rType["p.value",])
-  all.RepeatType$p.adjust.value <- p.adjust(all.RepeatType$p.value, method = "fdr", n = length(p))
+  all.RepeatType$p.adjust.value <- p.adjust(all.RepeatType$p.value, method = "fdr", n = length(all.RepeatType$p.value))
 
 
   binom.test.results <- list("RepeatName" = subset(all.RepeatName, p.value < 1e-03 & observe > expected), "RepeatFamily" = subset(all.RepeatFamily, p.value < 1e-03 & observe > expected), "RepeatType" = subset(all.RepeatType, p.value < 1e-03 & observe > expected))
