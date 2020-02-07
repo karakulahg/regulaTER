@@ -63,7 +63,7 @@ pathList <- list("Promoter" = "/home/nazmiye/Desktop/BIP/test/hg19.Promoter",
 4.
 ```
 
-test <- EnrichPARs(inputPeakFile = input.file, pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = rmsk)
+test <- EnrichPARs(inputPeakFile = input.file, pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = rmsk, format="narrow", minoverlap=0L)
 
 FindMotifs(df = test, repeatMaskerFile = rmsk, outDir = "../test/", homerPath = "~/Downloads/Tools/homer/")
 
