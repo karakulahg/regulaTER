@@ -21,7 +21,7 @@ MakeGrangeObj <- function(inputPeakFile){
     with(inputPeakFile,
          GenomicRanges::GRanges(seqnames, IRanges(start, end), strand = strand))
   if(ncol(inputPeakFile) > 6){
-    values(gr.input) <- inputPeakFile[, 6:ncol(inputPeakFile)]
+    values(gr.input) <- inputPeakFile[, 5:ncol(inputPeakFile)]
   }
 
   return(gr.input)
@@ -34,7 +34,7 @@ FormattingRM <- function(rmsk){
   last <- as.data.frame(stringr::str_split_fixed(rmsk$matching_class, "/", 2))
   rmsk <-
     data.frame(
-      "chr" = rmsk$qry_id,
+      "seqnames" = rmsk$qry_id,
       "start" = rmsk$qry_start,
       "end" = rmsk$qry_end,
       "strand" = rmsk$matching_repeat,
@@ -71,6 +71,79 @@ CountRM <- function(rmsk){
   return(rmsk.counts)
 }
 
+
+GetOverlap <- function(rmsk,
+                       gr.input, format, minoverlap=0L){
+
+  #### converts repeatMasker data frame into GRanges object ####
+
+  library(GenomicRanges)
+  gr.rmsk <- with(rmsk, GenomicRanges::GRanges(seqnames, IRanges(start, end), strand = strand))
+  values(gr.rmsk) <-
+    DataFrame(
+      RepeatName = rmsk$repeat_name,
+      RepeatFamily = rmsk$repeat_family,
+      RepeatType = rmsk$repeat_type
+    )
+
+
+  #### converts gr.input range into single nucleotide at summit location ####
+
+  if(format == "narrow"){
+
+    if(ncol(elementMetadata(gr.input))!= 0){
+      GenomicRanges::start(gr.input) <- GenomicRanges::start(gr.input) + gr.input$peak
+      GenomicRanges::end(gr.input) <- GenomicRanges::start(gr.input) + 1
+    }
+
+  }
+
+  #### finds repeat ranges with overlapping summits ####
+
+  if(format == "braod"){
+    m <- GenomicRanges::findOverlaps(gr.rmsk, gr.input, ignore.strand = TRUE, minoverlap = minoverlap)
+  }else{
+    m <- GenomicRanges::findOverlaps(gr.rmsk, gr.input, ignore.strand = TRUE)
+  }
+  gr.rmsk.matched <- gr.rmsk[queryHits(m)]
+
+  #### adds the metadata from gr2 to GRanges of intersecting peaks ####
+
+  mcols(gr.rmsk.matched) <- cbind.data.frame(mcols(gr.rmsk.matched),
+                                             mcols(gr.input[subjectHits(m)]))
+  return(gr.rmsk.matched)
+}
+
+CountElements <- function(gr.rmsk.matched, rmsk){
+
+  #### converts matched GRanges object into data frame and counts instances of given column name ####
+
+  df.rmsk.matched <- as.data.frame(gr.rmsk.matched)
+  diff.rName <- setdiff(rmsk$repeat_name, df.rmsk.matched$RepeatName)
+  diff.rFamily <- setdiff(rmsk$repeat_family, df.rmsk.matched$RepeatFamily)
+  diff.rType <- setdiff(rmsk$repeat_type, df.rmsk.matched$RepeatType)
+
+  library(dplyr)
+  x <- df.rmsk.matched %>% count(RepeatName)
+  colnames(x) <- c("RepeatName", "nRepeatName")
+  x <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
+
+  x1 <- df.rmsk.matched %>% count(RepeatFamily)
+  colnames(x1) <- c("RepeatFamily","nRepeatFamily")
+  x1 <- rbind(x1, data.frame(RepeatFamily = diff.rFamily, nRepeatFamily = rep.int(0, length(diff.rFamily))))
+
+  x2 <- df.rmsk.matched %>% count(RepeatType)
+  colnames(x2) <- c("RepeatType", "nRepeatType")
+  x2 <- rbind(x2, data.frame(RepeatType = diff.rType, nRepeatType = rep.int(0, length(diff.rType))))
+
+  all.counts <- list(x,x1,x2)
+
+  ####
+  return(all.counts)
+}
+
+
+
 CountIntersect <-
   function(repeatMaskerFile,
            inputPeakFile, format, minoverlap=0L) {
@@ -78,66 +151,11 @@ CountIntersect <-
     gr.input <- inputPeakFile
     rmsk <- FormattingRM(repeatMaskerFile)
 
-    #### converts repeatMasker data frame into GRanges object ####
 
-    library(GenomicRanges)
-    gr.rmsk <- with(rmsk, GenomicRanges::GRanges(chr, IRanges(start, end), strand = strand))
-    values(gr.rmsk) <-
-      DataFrame(
-        RepeatName = rmsk$repeat_name,
-        RepeatFamily = rmsk$repeat_family,
-        RepeatType = rmsk$repeat_type
-      )
+    gr.rmsk.matched <- GetOverlap(rmsk,
+                                  gr.input, format, minoverlap)
 
-
-    #### converts gr.input range into single nucleotide at summit location ####
-
-    if(format == "narrow"){
-
-      if(ncol(elementMetadata(gr.input))!= 0){
-        GenomicRanges::start(gr.input) <- GenomicRanges::start(gr.input) + gr.input$peak
-        GenomicRanges::end(gr.input) <- GenomicRanges::start(gr.input) + 1
-      }
-
-    }
-
-    #### finds repeat ranges with overlapping summits ####
-
-    if(format == "braod"){
-      m <- GenomicRanges::findOverlaps(gr.rmsk, gr.input, ignore.strand = TRUE, minoverlap = minoverlap)
-    }else{
-      m <- GenomicRanges::findOverlaps(gr.rmsk, gr.input, ignore.strand = TRUE)
-    }
-    gr.rmsk.matched <- gr.rmsk[queryHits(m)]
-
-    #### adds the metadata from gr2 to GRanges of intersecting peaks ####
-
-    mcols(gr.rmsk.matched) <- cbind.data.frame(mcols(gr.rmsk.matched),
-                                               mcols(gr.input[subjectHits(m)]))
-
-    #### converts matched GRanges object into data frame and counts instances of given column name ####
-
-    df.rmsk.matched <- as.data.frame(gr.rmsk.matched)
-    diff.rName <- setdiff(rmsk$repeat_name, df.rmsk.matched$RepeatName)
-    diff.rFamily <- setdiff(rmsk$repeat_family, df.rmsk.matched$RepeatFamily)
-    diff.rType <- setdiff(rmsk$repeat_type, df.rmsk.matched$RepeatType)
-
-    library(dplyr)
-    x <- df.rmsk.matched %>% count(RepeatName)
-    colnames(x) <- c("RepeatName", "nRepeatName")
-    x <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
-
-    x1 <- df.rmsk.matched %>% count(RepeatFamily)
-    colnames(x1) <- c("RepeatFamily","nRepeatFamily")
-    x1 <- rbind(x1, data.frame(RepeatFamily = diff.rFamily, nRepeatFamily = rep.int(0, length(diff.rFamily))))
-
-    x2 <- df.rmsk.matched %>% count(RepeatType)
-    colnames(x2) <- c("RepeatType", "nRepeatType")
-    x2 <- rbind(x2, data.frame(RepeatType = diff.rType, nRepeatType = rep.int(0, length(diff.rType))))
-
-    all.counts <- list(x,x1,x2)
-
-    ####
+    all.counts <- CountElements(gr.rmsk.matched, rmsk)
 
     return(all.counts)
 
@@ -205,7 +223,7 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
 EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerFile, format, minoverlap=0L){
 
   gr.input <- MakeGrangeObj(inputPeakFile = inputPeakFile)
-  observe.counts <- CountIntersect(repeatMaskerFile, gr.input,format, minoverlap)
+  observe.counts <- CountIntersect(repeatMaskerFile, gr.input, format, minoverlap)
 
   gr <- ShufflePeaks(inputPeakFile, pathList)
   expected.counts <- CountIntersect(repeatMaskerFile, gr, format, minoverlap)
@@ -295,11 +313,6 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
   family <- rmsk[which(rmsk$repeat_family %in% as.vector(binom.test.results$RepeatFamily$RepeatFamily)),]
   type <- rmsk[which(rmsk$repeat_type %in% as.vector(binom.test.results$RepeatType$RepeatType)),]
 
-  #   all.annot <- rbind(name,family,type)
-  #   all.annot$ID <- row.names(all.annot)
-  #
-  #   df <- all.annot[,c(1,2,3,8,5,4)]
-
   name$ID <- row.names(name)
   df.name <- name[,c(1,2,3,8,5,4)]
 
@@ -342,6 +355,103 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
 
 
 
+count <- test
+repeatList <- count[[1]][which(count[[1]]["observe"] >= 10),c("RepeatName","observe")]
+gr.input <- MakeGrangeObj(inputPeakFile = input.file)
+rmsk <- FormattingRM(rmsk)
+overlapped <- GetOverlap(rmsk = rmsk, gr.input = gr.input, format = "narrow")
+repeats.overlapped <- subset(overlapped, RepeatName %in% repeatList$RepeatName)
+genes <- ToolX::filterSubset(input = "../RepeatAnalysis/Data/genes.txt", assembly = "hg19", type = "geneNames")
+genes$seqnames<- sapply(1:nrow(genes), function(x) gsub("^\\d$", paste0("chr",genes$seqnames[x]), genes$seqnames[x]))
+d <- distanceToNearest(x = overlapped, subject = MakeGrangeObj(genes))
+m <- d[which(elementMetadata(d)$distance < 100000 ), ]
+result.overlapped <- overlapped[queryHits(m)]
+
+observed.counts <- CountElements(result.overlapped, rmsk)[[1]]
 
 
+
+
+
+gr.rmsk <- MakeGrangeObj(rmsk)
+
+## extract gr.rmsk not overlapping with gr.overlapped ganges
+gr.nonPAR<-gr.rmsk[!gr.rmsk %over% overlapped,]
+last.nonPAR <- data.frame()
+for(i in 1:nrow(repeatList)){
+
+  part.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observe[i]), ]
+  d <- distanceToNearest(x = part.nonPAR, subject = MakeGrangeObj(genes))
+  m <- d[which(elementMetadata(d)$distance < 100000000 ), ]
+  part.nonPAR <- part.nonPAR[queryHits(m)]
+  part.nonPAR$target <- repeatList$RepeatName[i]
+  if(i == 1){
+    last.nonPAR <- part.nonPAR
+  }else{
+    last.nonPAR <- append(last.nonPAR, part.nonPAR)
+  }
+
+}
+
+#### converts matched GRanges object into data frame and counts instances of given column name ####
+
+df.nonPAR <- as.data.frame(last.nonPAR)
+diff.rName <- setdiff(rmsk$repeat_name, df.nonPAR$target)
+
+library(dplyr)
+x <- df.nonPAR %>% count(target)
+colnames(x) <- c("RepeatName", "nRepeatName")
+expected.counts <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
+
+if(numberOfShuffle > 1){
+
+  for(i in 1:(numberOfShuffle-1)){
+
+    tmp.nonPAR <- data.frame()
+    for(i in 1:(nrow(repeatList))){
+
+      part.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observe[i]), ]
+      d <- distanceToNearest(x = part.nonPAR, subject = MakeGrangeObj(genes))
+      m <- d[which(elementMetadata(d)$distance < 100000000 ), ]
+      part.nonPAR <- part.nonPAR[queryHits(m)]
+      part.nonPAR$target <- repeatList$RepeatName[i]
+      if(i == 1){
+        tmp.nonPAR <- part.nonPAR
+      }else{
+        tmp.nonPAR <- append(tmp.nonPAR, part.nonPAR)
+      }
+
+    }
+
+    #### converts matched GRanges object into data frame and counts instances of given column name ####
+
+    df.nonPAR <- as.data.frame(tmp.nonPAR)
+    diff.rName <- setdiff(rmsk$repeat_name, df.nonPAR$target)
+
+    library(dplyr)
+    x <- df.nonPAR %>% count(target)
+    colnames(x) <- c("RepeatName", "nRepeatName")
+    tmp <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
+    expected.counts <- merge(expected.counts, tmp, by = "RepeatName")
+
+
+  }
+
+  expected.counts$Mean <- round(rowMeans(expected.counts[,c(2:ncol(expected.counts))]))
+
+
+}
+
+rmsk.counts <- CountRM(rmsk)
+
+
+all.RepeatName <- merge(as.data.frame(rmsk.counts[[1]]),as.data.frame(observed.counts), by = "RepeatName")
+all.RepeatName <- merge(all.RepeatName, expected.counts[,c("RepeatName","Mean")], by = "RepeatName")
+colnames(all.RepeatName) <- c("RepeatName","rmsk","observe","expected")
+
+test <- function(x, p, n){binom.test(x, p, n)}
+
+b.rName <- mapply(test, all.RepeatName$observe, all.RepeatName$rmsk, (all.RepeatName$expected/all.RepeatName$rmsk))
+all.RepeatName$p.value <- do.call(rbind, b.rName["p.value",])
+all.RepeatName$p.adjust.value <- p.adjust(all.RepeatName$p.value, method = "fdr", n = length(all.RepeatName$p.value))
 

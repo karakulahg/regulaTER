@@ -1,2 +1,5 @@
-exportPattern("^[[:alpha:]]+")
 exportPattern("CountIntersect")
+exportPattern("ShufflePeaks")
+exportPattern("EnrichPARs")
+exportPattern("FindMotifs")
+exportPattern("filterSubset")
