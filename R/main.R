@@ -21,7 +21,7 @@ MakeGrangeObj <- function(inputPeakFile){
     with(inputPeakFile,
          GenomicRanges::GRanges(seqnames, IRanges(start, end), strand = strand))
   if(ncol(inputPeakFile) > 6){
-    elementMetadata(gr.input) <- inputPeakFile[, 5:ncol(inputPeakFile)]
+      elementMetadata(gr.input) <- inputPeakFile[, 5:ncol(inputPeakFile)]
   }
   if(is.element("strand", colnames(elementMetadata(gr.input)))){
     elementMetadata(gr.input) <- elementMetadata(gr.input)[,-which(colnames(elementMetadata(gr.input)) == "strand")]
@@ -95,7 +95,7 @@ GetOverlap <- function(rmsk,
   if(format == "narrow"){
 
     if(ncol(elementMetadata(gr.input))!= 0){
-      GenomicRanges::start(gr.input) <- GenomicRanges::start(gr.input) + gr.input$peak
+      GenomicRanges::start(gr.input) <- GenomicRanges::start(gr.input) + as.data.frame(gr.input)[,10]
       GenomicRanges::end(gr.input) <- GenomicRanges::start(gr.input) + 1
     }
 
@@ -173,8 +173,8 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
   gr.Promoter <- gr.input[grepl('Promoter', gr.input$annotation),]
   gr.Exon <- gr.input[grepl('Exon', gr.input$annotation),]
   gr.Intron <- gr.input[grepl('Intron', gr.input$annotation),]
-  gr.5UTR <- gr.input[grepl("5' UTR", gr.input$annotation),]
-  gr.3UTR <- gr.input[grepl("3' UTR", gr.input$annotation),]
+  gr.5UTR <- gr.input[grepl("5 UTR", gr.input$annotation),]
+  gr.3UTR <- gr.input[grepl("3 UTR", gr.input$annotation),]
   gr.Intergenic <- gr.input[grepl('Intergenic', gr.input$annotation),]
   gr.Downstream <- gr.Intron <- gr.input[grepl('Downstream', gr.input$annotation),]
 
@@ -264,7 +264,7 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
 
   }
 
-  rmsk <- FormattingRM(rmsk)
+  rmsk <- FormattingRM(repeatMaskerFile)
   rmsk.counts <- CountRM(rmsk)
 
 
@@ -370,7 +370,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
   overlapped <- GetOverlap(rmsk = rmsk, gr.input = gr.input, format = "narrow")
   repeats.overlapped <- subset(overlapped, RepeatName %in% repeatList$RepeatName)
   d <- distanceToNearest(x = overlapped, subject = MakeGrangeObj(genes))
-  m <- d[which(elementMetadata(d)$distance < 100000 ), ]
+  m <- d[which(elementMetadata(d)$distance < distance ), ]
   result.overlapped <- overlapped[queryHits(m)]
 
   observed.counts <- CountElements(result.overlapped, rmsk)[[1]]
@@ -383,24 +383,30 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
   last.nonPAR <- data.frame()
   isfirsttime <- "false"
 
-  for(i in 1:nrow(repeatList)){
+  if(nrow(repeatList) !=0 ){
 
-    part.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observe[i]), ]
-    d <- distanceToNearest(x = part.nonPAR, subject = MakeGrangeObj(genes))
-    m <- d[which(elementMetadata(d)$distance < 100000000000 ), ]
-    part.nonPAR <- part.nonPAR[queryHits(m)]
-    if(length(part.nonPAR) != 0){
-      elementMetadata(part.nonPAR)$target <- as.character(repeatList$RepeatName[i])
-      if(i == 1 | isfirsttime == "true"){
-        last.nonPAR <- part.nonPAR
-        isfirsttime <- "false"
-      }else{
-        last.nonPAR <- append(last.nonPAR, part.nonPAR)
-      }
-    }else{ isfirsttime == "true" }
+    for(i in 1:nrow(repeatList)){
 
+      part.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observe[i]), ]
+      d <- distanceToNearest(x = part.nonPAR, subject = MakeGrangeObj(genes))
+      m <- d[which(elementMetadata(d)$distance < distance ), ]
+      part.nonPAR <- part.nonPAR[queryHits(m)]
+      if(length(part.nonPAR) != 0){
+        elementMetadata(part.nonPAR)$target <- as.character(repeatList$RepeatName[i])
+        if(i == 1 | isfirsttime == "true"){
+          last.nonPAR <- part.nonPAR
+          isfirsttime <- "false"
+        }else{
+          last.nonPAR <- append(last.nonPAR, part.nonPAR)
+        }
+      }else{ isfirsttime == "true" }
+
+
+    }
 
   }
+
+
 
   #### converts matched GRanges object into data frame and counts instances of given column name ####
 
@@ -408,8 +414,11 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
   diff.rName <- setdiff(rmsk$repeat_name, df.nonPAR$target)
 
   library(dplyr)
-  x <- df.nonPAR %>% count(target)
-  colnames(x) <- c("RepeatName", "nRepeatName")
+  if(nrow(df.nonPAR) != 0){
+    x <- df.nonPAR %>% count(target)
+    colnames(x) <- c("RepeatName", "nRepeatName")
+  }
+
   expected.counts <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
 
   if(numberOfShuffle > 1){
@@ -421,7 +430,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
 
         tmp.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observe[i]), ]
         d <- distanceToNearest(x = tmp.nonPAR, subject = MakeGrangeObj(genes))
-        m <- d[which(elementMetadata(d)$distance < 100000000000 ), ]
+        m <- d[which(elementMetadata(d)$distance < distance ), ]
         tmp.nonPAR <- tmp.nonPAR[queryHits(m)]
         if(length(tmp.nonPAR) != 0){
           elementMetadata(tmp.nonPAR)$target <- as.character(repeatList$RepeatName[i])
