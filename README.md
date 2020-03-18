@@ -54,21 +54,26 @@ input.file <- read.table("../test/mm10_test/Annotated_forebrain_16_5_rep_1_peaks
 3. Using the Table Browser tool of UCSC Genome Browser, or another similar method, generate BED files for the following genomic regions, as compatible with ChIPseeker annotations. Promoter region is defined as 3000 bases upstream of the gene region, while Downstream region is defined as 3000 bases downstream. The genomeSizePath should point to a file with two columns, with the first column corresponding to chromosome names in order, and the second column corresponding to chromosome size.
 ```
 
-pathList <- list("Promoter" = "/home/nazmiye/Desktop/BIP/test/mm10_test/mm10_promoter.bed",
-     "Exon" = "/home/nazmiye/Desktop/BIP/test/mm10_test/mm10_exons.bed",
-     "Intron" = "/home/nazmiye/Desktop/BIP/test/mm10_test/mm10_introns.bed",
-     "5UTR" = "/home/nazmiye/Desktop/BIP/test/mm10_test/mm10_5prime.bed",
-     "3UTR" = "/home/nazmiye/Desktop/BIP/test/mm10_test/mm10_3prime.bed",
-     "Downstream" = "/home/nazmiye/Desktop/BIP/test/mm10_test/mm10_downstream.bed",
-     "genomeSizePath" = "/home/nazmiye/Desktop/BIP/test/mm10_test/mm10_chrom_sizes.txt"
+pathList <- list("Promoter" = "../test/mm10_test/mm10_promoter.bed",
+     "Exon" = "../test/mm10_test/mm10_exons.bed",
+     "Intron" = "../test/mm10_test/mm10_introns.bed",
+     "5UTR" = "../test/mm10_test/mm10_5prime.bed",
+     "3UTR" = "../test/mm10_test/mm10_3prime.bed",
+     "Downstream" = "../test/mm10_test/mm10_downstream.bed",
+     "genomeSizePath" = "../test/mm10_test/mm10_chrom_sizes.txt"
   )
 
 
 ```
 4.
 ```
+start <- Sys.time()
+print(start)
+test <- EnrichPARs(inputPeakFile = input.file, pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = raw.rmsk, format="narrow", minoverlap=0L)
+end <- Sys.time()
+print(end)
+print(paste("sh time :", (end - start )))
 
-test <- EnrichPARs(inputPeakFile = input.file[1:500,], pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = raw.rmsk, format="narrow", minoverlap=0L)
 
 FindMotifs(df = test, repeatMaskerFile = rmsk, outDir = "../test/", homerPath = "~/Downloads/Tools/homer/")
 
@@ -77,9 +82,15 @@ FindMotifs(df = test, repeatMaskerFile = rmsk, outDir = "../test/", homerPath = 
 5.
 ```
 
-genes <- ToolX::filterSubset(input = "../RepeatAnalysis/Data/genes.txt", assembly = "hg19", type = "geneNames")
+genes <- ToolX::getInterval(input,dataset)
 genes$seqnames<- sapply(1:nrow(genes), function(x) gsub("^\\d$", paste0("chr",genes$seqnames[x]), genes$seqnames[x]))
-result <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = peak[1:2000,], rmsk = rmsk, genes = genes, numberOfShuffle = 2)
+
+start <- Sys.time()
+print(start)
+result <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 2)
+end <- Sys.time()
+print(end)
+print(paste("sh time :", (end - start )))
 
 
 ```

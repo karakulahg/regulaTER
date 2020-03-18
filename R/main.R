@@ -178,10 +178,12 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
   gr.Intergenic <- gr.input[grepl('Intergenic', gr.input$annotation),]
   gr.Downstream <- gr.Intron <- gr.input[grepl('Downstream', gr.input$annotation),]
 
-
+  start <- Sys.time()
   write.table(as.data.frame(gr.Promoter), file="Promoter.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Promoter.bed -g ",pathList$genomeSizePath," -incl ",pathList$Promoter," > shuffled.promoters "))
   sh.promoter <- read.csv("shuffled.promoters", header = F, sep = "\t")
+  end <- Sys.time()
+  print(paste("promerter sh time :", (end - start )))
 
   write.table(as.data.frame(gr.Exon), file="Exon.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Exon.bed -g ",pathList$genomeSizePath," -incl ",pathList$Exon," > shuffled.exons "))
@@ -228,9 +230,17 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
   gr.input <- MakeGrangeObj(inputPeakFile = inputPeakFile)
   observe.counts <- CountIntersect(repeatMaskerFile, gr.input, format, minoverlap)
 
+  start <- Sys.time()
   gr <- ShufflePeaks(inputPeakFile, pathList)
-  expected.counts <- CountIntersect(repeatMaskerFile, gr, format, minoverlap)
+  end <- Sys.time()
+  print(paste("sh time :", (end - start )))
 
+  start <- Sys.time()
+  expected.counts <- CountIntersect(repeatMaskerFile, gr, format, minoverlap)
+  end <- Sys.time()
+  print(paste("Countintersect time :", (end - start )))
+
+  start <- Sys.time()
   if(numberOfShuffle > 1){
 
     Rname <- as.data.frame(expected.counts[[1]])
@@ -239,8 +249,15 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
 
     for(i in 1:numberOfShuffle){
 
+      start <- Sys.time()
       tmp <-  ShufflePeaks(inputPeakFile, pathList)
+      end <- Sys.time()
+      print(paste("sh time :", (end - start )))
+
+      start <- Sys.time()
       tmp.counts <- CountIntersect(repeatMaskerFile, tmp, format, minoverlap)
+      end <- Sys.time()
+      print(paste("Countintersect time :", (end - start )))
 
       tmp.Rname <- as.data.frame(tmp.counts[[1]])
       colnames(tmp.Rname) <- c("RepeatName",i)
@@ -299,6 +316,9 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
 
   binom.test.results <- list("RepeatName" = subset(all.RepeatName, p.value < 1e-03 & observe > expected), "RepeatFamily" = subset(all.RepeatFamily, p.value < 1e-03 & observe > expected), "RepeatType" = subset(all.RepeatType, p.value < 1e-03 & observe > expected))
 
+  end <- Sys.time()
+  print(paste("Countintersect time :", (end - start )))
+
   return(binom.test.results)
 
 }
@@ -355,9 +375,6 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
 
 }
 
-# genes <- ToolX::filterSubset(input = "../RepeatAnalysis/Data/genes.txt", assembly = "hg19", type = "geneNames")
-# genes$seqnames<- sapply(1:nrow(genes), function(x) gsub("^\\d$", paste0("chr",genes$seqnames[x]), genes$seqnames[x]))
-
 
 IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numberOfShuffle = 100, distance = 100000){
 
@@ -381,7 +398,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
   ## extract gr.rmsk not overlapping with gr.overlapped ganges
   gr.nonPAR<-gr.rmsk[!gr.rmsk %over% overlapped,]
   last.nonPAR <- data.frame()
-  isfirsttime <- "false"
+  isfirsttime <- "true"
 
   if(nrow(repeatList) !=0 ){
 
@@ -393,13 +410,14 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
       part.nonPAR <- part.nonPAR[queryHits(m)]
       if(length(part.nonPAR) != 0){
         elementMetadata(part.nonPAR)$target <- as.character(repeatList$RepeatName[i])
-        if(i == 1 | isfirsttime == "true"){
+        if(isfirsttime == "true"){
           last.nonPAR <- part.nonPAR
           isfirsttime <- "false"
         }else{
           last.nonPAR <- append(last.nonPAR, part.nonPAR)
         }
-      }else{ isfirsttime == "true" }
+      }else{ isfirsttime == "true"
+             last.nonPAR <- tmp.nonPAR}
 
 
     }
@@ -414,6 +432,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
   diff.rName <- setdiff(rmsk$repeat_name, df.nonPAR$target)
 
   library(dplyr)
+  x <- data.frame()
   if(nrow(df.nonPAR) != 0){
     x <- df.nonPAR %>% count(target)
     colnames(x) <- c("RepeatName", "nRepeatName")
@@ -421,6 +440,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
 
   expected.counts <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
 
+  isfirsttime == "true"
   if(numberOfShuffle > 1){
 
     for(i in 1:(numberOfShuffle)){
@@ -434,13 +454,14 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
         tmp.nonPAR <- tmp.nonPAR[queryHits(m)]
         if(length(tmp.nonPAR) != 0){
           elementMetadata(tmp.nonPAR)$target <- as.character(repeatList$RepeatName[i])
-          if(i == 1 | isfirsttime == "true"){
+          if(isfirsttime == "true"){
             last.nonPAR <- tmp.nonPAR
             isfirsttime <- "false"
           }else{
             last.nonPAR <- append(last.nonPAR, tmp.nonPAR)
           }
-        }else{ isfirsttime == "true" }
+        }else{ isfirsttime == "true"
+               last.nonPAR <- tmp.nonPAR}
 
 
       }
@@ -450,10 +471,11 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
 
       df.nonPAR <- as.data.frame(last.nonPAR)
       diff.rName <- setdiff(rmsk$repeat_name, df.nonPAR$target)
-
-      library(dplyr)
-      x <- df.nonPAR %>% count(target)
-      colnames(x) <- c("RepeatName", "nRepeatName")
+      x <- data.frame()
+      if(nrow(df.nonPAR) != 0){
+        x <- df.nonPAR %>% count(target)
+        colnames(x) <- c("RepeatName", "nRepeatName")
+      }
       tmp <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
       expected.counts <- merge(expected.counts, tmp, by = "RepeatName")
 
@@ -480,4 +502,33 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
 
 }
 
+# input <- "../test/mm10_test/gene_symbols.txt"
+# dataset <- "mmusculus_gene_ensembl"
+# genes <- getInterval(input,dataset)
+getInterval <- function(input, dataset){
 
+  library(biomaRt)
+  ensembl = biomaRt::useEnsembl(biomart="ensembl", dataset="mmusculus_gene_ensembl", verbose = TRUE)
+  df<-scan(input,character())
+
+  gene_ids <- getBM(attributes = c("ensembl_gene_id", "external_gene_name"), filters = c("external_gene_name"), values = df, mart = ensembl, verbose = T)
+
+  data <- getBM(attributes = c("ensembl_gene_id","external_gene_name",
+                               "chromosome_name", "start_position", "end_position",
+                               "strand"),
+
+                filters = c("ensembl_gene_id"), #listFilters(ensembl)
+                values = gene_ids$ensembl_gene_id,
+                mart=ensembl,
+                verbose = TRUE)
+
+  names(data)<-c("geneID","geneName","seqnames","start","end","strand")
+
+  hit<-which(data$strand=="1")
+  data$strand[hit]<-"+"
+
+  hit<-which(data$strand=="-1")
+  data$strand[hit]<-"-"
+
+  return(data)
+}
