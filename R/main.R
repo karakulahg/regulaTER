@@ -417,7 +417,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
           last.nonPAR <- append(last.nonPAR, part.nonPAR)
         }
       }else{ isfirsttime == "true"
-             last.nonPAR <- tmp.nonPAR}
+             last.nonPAR <- part.nonPAR}
 
 
     }
