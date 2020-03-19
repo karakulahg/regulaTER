@@ -346,7 +346,7 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
   df.type <- type[,c(1,2,3,8,5,4)]
 
 
-  write.table(df.name, file = paste0(outDir,"/repeatName.bed"), quote=F, sep="\t", row.names=F, col.names=F,)
+  write.table(df.name, file = paste0(outDir,"/repeatName.bed"), quote=F, sep="\t", row.names=F, col.names=F)
   write.table(df.family, file = paste0(outDir,"/repeatFamily.bed"), quote=F, sep="\t", row.names=F, col.names=F)
   write.table(df.type, file = paste0(outDir,"/repeatType.bed"), quote=F, sep="\t", row.names=F, col.names=F)
 
@@ -440,20 +440,21 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
 
   expected.counts <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
 
-  isfirsttime == "true"
+
   if(numberOfShuffle > 1){
 
     for(i in 1:(numberOfShuffle)){
 
       last.nonPAR <- data.frame()
-      for(i in 1:nrow(repeatList)){
+      isfirsttime <- "true"
+      for(j in 1:nrow(repeatList)){
 
-        tmp.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observe[i]), ]
+        tmp.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observe[j]), ]
         d <- distanceToNearest(x = tmp.nonPAR, subject = MakeGrangeObj(genes))
         m <- d[which(elementMetadata(d)$distance < distance ), ]
         tmp.nonPAR <- tmp.nonPAR[queryHits(m)]
         if(length(tmp.nonPAR) != 0){
-          elementMetadata(tmp.nonPAR)$target <- as.character(repeatList$RepeatName[i])
+          elementMetadata(tmp.nonPAR)$target <- as.character(repeatList$RepeatName[j])
           if(isfirsttime == "true"){
             last.nonPAR <- tmp.nonPAR
             isfirsttime <- "false"
@@ -480,10 +481,11 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
       expected.counts <- merge(expected.counts, tmp, by = "RepeatName")
 
     }
-
     expected.counts$Mean <- round(rowMeans(expected.counts[,c(2:ncol(expected.counts))]))
-
+  }else{
+    names(expected.counts)[2] <- "Mean"
   }
+
 
   rmsk.counts <- CountRM(rmsk)
 
