@@ -87,7 +87,7 @@ genes$seqnames<- sapply(1:nrow(genes), function(x) gsub("^\\d$", paste0("chr",ge
 
 start <- Sys.time()
 print(start)
-result100 <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 100, distance = 10000000000000000000000)
+result100 <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 500, distance = 10000000000000000000000)
 end <- Sys.time()
 print(end)
 print(paste("sh time :", (end - start )))
@@ -95,7 +95,11 @@ print(paste("sh time :", (end - start )))
 
 ```
 
+6.
+```
+estimate <- EstimateRepeatAge(repeatMasterFile = raw.rmsk, peakFile = peakFile, substRate = 4.5e-09)
 
+```
 
 #### Session Info
 
