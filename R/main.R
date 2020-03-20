@@ -31,11 +31,11 @@ MakeGrangeObj <- function(inputPeakFile){
 }
 
 #### rearranges repeatMasker file for function convenience ####
-FormattingRM <- function(rmsk){
+FormattingRM <- function(rmsk, goal = "base"){
 
   library(biomartr)
   last <- as.data.frame(stringr::str_split_fixed(rmsk$matching_class, "/", 2))
-  rmsk <-
+  new.rmsk <-
     data.frame(
       "seqnames" = rmsk$qry_id,
       "start" = rmsk$qry_start,
@@ -45,16 +45,20 @@ FormattingRM <- function(rmsk){
       "repeat_type" = last$V1,
       "repeat_family" = last$V2
     )
-  rmsk$strand <- as.character(rmsk$strand)
-  rmsk$strand <- replace(rmsk$strand, rmsk$strand == "C", "-")
+  new.rmsk$strand <- as.character(new.rmsk$strand)
+  new.rmsk$strand <- replace(new.rmsk$strand, new.rmsk$strand == "C", "-")
 
-  hit <- rmsk$repeat_family == ""
-  rmsk <- rmsk[!hit,]
+  if(goal == "calcAge"){
+    new.rmsk$perc_div <- as.integer(rmsk$perc_div)
+  }
 
-  hit2 <- rmsk$repeat_type == "Unknown"
-  rmsk <- rmsk[!hit2,]
+  hit <- new.rmsk$repeat_family == ""
+  new.rmsk <- new.rmsk[!hit,]
 
-  return(rmsk)
+  hit2 <- new.rmsk$repeat_type == "Unknown"
+  new.rmsk <- new.rmsk[!hit2,]
+
+  return(new.rmsk)
 }
 
 CountRM <- function(rmsk){
@@ -76,19 +80,21 @@ CountRM <- function(rmsk){
 
 
 GetOverlap <- function(rmsk,
-                       gr.input, format, minoverlap=0L){
+                       gr.input, format, minoverlap=0L, goal="base"){
 
   #### converts repeatMasker data frame into GRanges object ####
 
   library(GenomicRanges)
   gr.rmsk <- with(rmsk, GenomicRanges::GRanges(seqnames, IRanges(start, end), strand = strand))
-  values(gr.rmsk) <-
+  elementMetadata(gr.rmsk) <-
     DataFrame(
       RepeatName = rmsk$repeat_name,
       RepeatFamily = rmsk$repeat_family,
       RepeatType = rmsk$repeat_type
     )
-
+   if(goal=="calcAge"){
+     elementMetadata(gr.rmsk)<- DataFrame(elementMetadata(gr.rmsk), perc_div = as.integer(rmsk$perc_div))
+   }
 
   #### converts gr.input range into single nucleotide at summit location ####
 
@@ -503,6 +509,54 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
   return(all.RepeatName)
 
 }
+
+
+EstimateRepeatAge <- function(repeatMasterFile, peakFile, substRate){
+
+  rmsk <- FormattingRM(repeatMasterFile, goal = "calcAge")
+  gr.rmsk <- MakeGrangeObj(rmsk)
+  gr.peak <- MakeGrangeObj(peakFile)
+
+  overlapped <- GetOverlap(rmsk = gr.rmsk, gr.input = gr.peak, format = "narrow", goal = "calcAge")
+
+  df.PAR <- as.data.frame(overlapped)
+
+  ## extract gr.rmsk not overlapping with gr.overlapped ganges
+  gr.nonPAR<-gr.rmsk[!gr.rmsk %over% overlapped,]
+  df.nonPAR <- as.data.frame(gr.nonPAR)
+
+## calculate mean of perc_div for each repeat
+  x1 <- data.frame()
+  if(nrow(df.PAR) != 0){
+    x1<- df.PAR[,c("RepeatName","perc_div")] %>%
+      group_by(RepeatName) %>%
+      summarise(Age = (mean(perc_div)))
+  }
+  x1$Type <- "PAR"
+
+  x2 <- data.frame()
+  if(nrow(df.nonPAR) != 0){
+    x2<- df.nonPAR[,c("repeat_name","perc_div")] %>%
+      group_by(repeat_name) %>%
+      summarise(Age = (mean(perc_div)))
+  }
+  x2$Type <- "nonPAR"
+  colnames(x2)[1] <- "RepeatName"
+
+  x <- rbind(x1,x2)
+
+  ## calculate age of each repeat when annotated on genome
+  x$Age <- (x$Age * 10) / substRate
+
+  return(x)
+
+}
+
+
+
+
+
+
 
 # input <- "../test/mm10_test/gene_symbols.txt"
 # dataset <- "mmusculus_gene_ensembl"
