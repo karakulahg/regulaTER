@@ -97,7 +97,7 @@ print(paste("sh time :", (end - start )))
 
 6.
 ```
-estimate <- EstimateRepeatAge(repeatMasterFile = raw.rmsk, peakFile = peakFile, substRate = 4.5e-09)
+estimate <- ToolX::EstimateRepeatAge(repeatMasterFile = raw.rmsk, peakFile = input.file, substRate = 4.5e-09)
 
 ```
 
