@@ -183,12 +183,9 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
   gr.Intergenic <- gr.input[grepl('Intergenic', gr.input$annotation),]
   gr.Downstream <- gr.Intron <- gr.input[grepl('Downstream', gr.input$annotation),]
 
-  start <- Sys.time()
   write.table(as.data.frame(gr.Promoter), file="Promoter.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Promoter.bed -g ",pathList$genomeSizePath," -incl ",pathList$Promoter," > shuffled.promoters "))
   sh.promoter <- read.csv("shuffled.promoters", header = F, sep = "\t")
-  end <- Sys.time()
-  print(paste("promerter sh time :", (end - start )))
 
   write.table(as.data.frame(gr.Exon), file="Exon.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Exon.bed -g ",pathList$genomeSizePath," -incl ",pathList$Exon," > shuffled.exons "))
@@ -235,17 +232,10 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
   gr.input <- MakeGrangeObj(inputPeakFile = inputPeakFile)
   observe.counts <- CountIntersect(repeatMaskerFile, gr.input, format, minoverlap)
 
-  start <- Sys.time()
   gr <- ShufflePeaks(inputPeakFile, pathList)
-  end <- Sys.time()
-  print(paste("sh time :", (end - start )))
 
-  start <- Sys.time()
   expected.counts <- CountIntersect(repeatMaskerFile, gr, format, minoverlap)
-  end <- Sys.time()
-  print(paste("Countintersect time :", (end - start )))
 
-  start <- Sys.time()
   if(numberOfShuffle > 1){
 
     Rname <- as.data.frame(expected.counts[[1]])
@@ -282,6 +272,10 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
     Rfamily$Mean <- round(rowMeans(Rfamily[,c(2:ncol(Rfamily))]))
     Rtype$Mean <- round(rowMeans(Rtype[,c(2:ncol(Rtype))]))
 
+    Rname$TrueMean <- rowMeans(Rname[,c(2:ncol(Rname))])
+    Rfamily$TrueMean <-rowMeans(Rfamily[,c(2:ncol(Rfamily))])
+    Rtype$TrueMean <- rowMeans(Rtype[,c(2:ncol(Rtype))])
+
     expected.counts <- list(Rname,Rfamily,Rtype)
 
   }
@@ -291,38 +285,58 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
 
 
   all.RepeatName <- merge(as.data.frame(rmsk.counts[[1]]),as.data.frame(observe.counts[[1]]), by = "RepeatName")
-  all.RepeatName <- merge(all.RepeatName, as.data.frame(expected.counts[[1]][,c(1,ncol(expected.counts[[1]]))]), by = "RepeatName")
-  colnames(all.RepeatName) <- c("RepeatName","rmsk","observe","expected")
+  all.RepeatName <- merge(all.RepeatName, as.data.frame(expected.counts[[1]][,c("RepeatName","Mean", "TrueMean")]), by = "RepeatName")
+  colnames(all.RepeatName) <- c("RepeatName","rmsk","observed","expected","TrueMean")
 
 
   all.RepeatFamily <- merge(as.data.frame(rmsk.counts[[2]]),as.data.frame(observe.counts[[2]]), by = "RepeatFamily")
-  all.RepeatFamily <- merge(all.RepeatFamily, as.data.frame(expected.counts[[2]][,c(1,ncol(expected.counts[[1]]))]), by = "RepeatFamily")
-  colnames(all.RepeatFamily) <- c("RepeatFamily","rmsk","observe","expected")
+  all.RepeatFamily <- merge(all.RepeatFamily, as.data.frame(expected.counts[[2]][,c("RepeatFamily","Mean", "TrueMean")]), by = "RepeatFamily")
+  colnames(all.RepeatFamily) <- c("RepeatFamily","rmsk","observed","expected","TrueMean")
 
   all.RepeatType <- merge(as.data.frame(rmsk.counts[[3]]),as.data.frame(observe.counts[[3]]), by = "RepeatType")
-  all.RepeatType <- merge(all.RepeatType, as.data.frame(expected.counts[[3]][,c(1,ncol(expected.counts[[1]]))]), by = "RepeatType")
-  colnames(all.RepeatType) <- c("RepeatType","rmsk","observe","expected")
+  all.RepeatType <- merge(all.RepeatType, as.data.frame(expected.counts[[3]][,c("RepeatType","Mean", "TrueMean")]), by = "RepeatType")
+  colnames(all.RepeatType) <- c("RepeatType","rmsk","observed","expected","TrueMean")
 
 
   test <- function(x, p, n){binom.test(x, p, n)}
 
-  b.rName <- mapply(test, all.RepeatName$observe, all.RepeatName$rmsk, (all.RepeatName$expected/all.RepeatName$rmsk))
+  b.rName <- mapply(test, all.RepeatName$observed, all.RepeatName$rmsk, (all.RepeatName$expected/all.RepeatName$rmsk))
   all.RepeatName$p.value <- do.call(rbind, b.rName["p.value",])
   all.RepeatName$p.adjust.value <- p.adjust(all.RepeatName$p.value, method = "fdr", n = length(all.RepeatName$p.value))
+  all.RepeatName$obsOnTrueMean <- all.RepeatName$observed/all.RepeatName$TrueMean
 
-  b.rFamily <- mapply(test,all.RepeatFamily$observe, all.RepeatFamily$rmsk, (all.RepeatFamily$expected/all.RepeatFamily$rmsk))
+  b.rFamily <- mapply(test,all.RepeatFamily$observed, all.RepeatFamily$rmsk, (all.RepeatFamily$expected/all.RepeatFamily$rmsk))
   all.RepeatFamily$p.value <- do.call(rbind, b.rFamily["p.value",])
   all.RepeatFamily$p.adjust.value <- p.adjust(all.RepeatFamily$p.value, method = "fdr", n = length(all.RepeatFamily$p.value))
+  all.RepeatFamily$obsOnTrueMean <- all.RepeatFamily$observed/all.RepeatFamily$TrueMean
 
-  b.rType <- mapply(test, all.RepeatType$observe, all.RepeatType$rmsk, (all.RepeatType$expected/all.RepeatType$rmsk))
+  b.rType <- mapply(test, all.RepeatType$observed, all.RepeatType$rmsk, (all.RepeatType$expected/all.RepeatType$rmsk))
   all.RepeatType$p.value <- do.call(rbind, b.rType["p.value",])
   all.RepeatType$p.adjust.value <- p.adjust(all.RepeatType$p.value, method = "fdr", n = length(all.RepeatType$p.value))
+  all.RepeatType$obsOnTrueMean <- all.RepeatType$observed/all.RepeatType$TrueMean
 
+  binom.test.results <- list("RepeatName" = subset(all.RepeatName, p.value < 1e-03 & observed > expected), "RepeatFamily" = subset(all.RepeatFamily, p.value < 1e-03 & observed > expected), "RepeatType" = subset(all.RepeatType, p.value < 1e-03 & observed > expected))
 
-  binom.test.results <- list("RepeatName" = subset(all.RepeatName, p.value < 1e-03 & observe > expected), "RepeatFamily" = subset(all.RepeatFamily, p.value < 1e-03 & observe > expected), "RepeatType" = subset(all.RepeatType, p.value < 1e-03 & observe > expected))
+  if(nrow(binom.test.results$RepeatName)!=0){
 
-  end <- Sys.time()
-  print(paste("Countintersect time :", (end - start )))
+    hit.inf <- binom.test.results$RepeatName["obsOnTrueMean"] == "Inf"
+    binom.test.results$RepeatName["obsOnTrueMean"][hit.inf] <- "NA"
+
+  }
+
+  if(nrow(binom.test.results$RepeatFamily)!=0){
+
+    hit.inf <- binom.test.results$RepeatFamily["obsOnTrueMean"] == "Inf"
+    binom.test.results$RepeatFamily["obsOnTrueMean"][hit.inf] <- "NA"
+
+  }
+
+  if(nrow(binom.test.results$RepeatType)!=0){
+
+    hit.inf <- binom.test.results$RepeatType["obsOnTrueMean"] == "Inf"
+    binom.test.results$RepeatType["obsOnTrueMean"][hit.inf] <- "NA"
+
+  }
 
   return(binom.test.results)
 
