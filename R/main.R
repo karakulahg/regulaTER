@@ -49,7 +49,7 @@ FormattingRM <- function(rmsk, goal = "base"){
   new.rmsk$strand <- replace(new.rmsk$strand, new.rmsk$strand == "C", "-")
 
   if(goal == "calcAge"){
-    new.rmsk$perc_div <- as.integer(rmsk$perc_div)
+    new.rmsk$perc_div <- as.numeric(rmsk$perc_div)
   }
 
   hit <- new.rmsk$repeat_family == ""
@@ -79,8 +79,7 @@ CountRM <- function(rmsk){
 }
 
 
-GetOverlap <- function(rmsk,
-                       gr.input, format, minoverlap=0L, goal="base"){
+GetOverlap <- function(rmsk, gr.input, format, minoverlap=0L, goal="base"){
 
   #### converts repeatMasker data frame into GRanges object ####
 
@@ -93,7 +92,7 @@ GetOverlap <- function(rmsk,
       RepeatType = rmsk$repeat_type
     )
    if(goal=="calcAge"){
-     elementMetadata(gr.rmsk)<- DataFrame(elementMetadata(gr.rmsk), perc_div = as.integer(rmsk$perc_div))
+     elementMetadata(gr.rmsk)<- DataFrame(elementMetadata(gr.rmsk), perc_div = as.numeric(rmsk$perc_div))
    }
 
   #### converts gr.input range into single nucleotide at summit location ####
@@ -517,7 +516,7 @@ EstimateRepeatAge <- function(repeatMasterFile, peakFile, substRate){
   gr.rmsk <- MakeGrangeObj(rmsk)
   gr.peak <- MakeGrangeObj(peakFile)
 
-  overlapped <- GetOverlap(rmsk = gr.rmsk, gr.input = gr.peak, format = "narrow", goal = "calcAge")
+  overlapped <- GetOverlap(rmsk = rmsk, gr.input = gr.peak, format = "narrow", goal = "calcAge")
 
   df.PAR <- as.data.frame(overlapped)
 
@@ -551,11 +550,6 @@ EstimateRepeatAge <- function(repeatMasterFile, peakFile, substRate){
   return(x)
 
 }
-
-
-
-
-
 
 
 # input <- "../test/mm10_test/gene_symbols.txt"

@@ -2,4 +2,6 @@ exportPattern("CountIntersect")
 exportPattern("ShufflePeaks")
 exportPattern("EnrichPARs")
 exportPattern("FindMotifs")
-exportPattern("filterSubset")
+exportPattern("GetOverlap")
+exportPattern("EstimateRepeatAge")
+
