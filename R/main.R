@@ -406,7 +406,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
 
   count <- enrichPARsResult
   input.file <- peaks
-  repeatList <- count[[1]][which(count[[1]]["observe"] >= 2),c("RepeatName","observe")]
+  repeatList <- count[[1]][which(count[[1]]["observed"] >= 2),c("RepeatName","observed")]
   gr.input <- MakeGrangeObj(inputPeakFile = input.file)
   rmsk <- FormattingRM(rmsk)
   overlapped <- GetOverlap(rmsk = rmsk, gr.input = gr.input, format = "narrow")
@@ -429,7 +429,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
 
     for(i in 1:nrow(repeatList)){
 
-      part.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observe[i]), ]
+      part.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observed[i]), ]
       d <- distanceToNearest(x = part.nonPAR, subject = MakeGrangeObj(genes))
       m <- d[which(elementMetadata(d)$distance < distance ), ]
       part.nonPAR <- part.nonPAR[queryHits(m)]
@@ -474,7 +474,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
       isfirsttime <- "true"
       for(j in 1:nrow(repeatList)){
 
-        tmp.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observe[j]), ]
+        tmp.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observed[j]), ]
         d <- distanceToNearest(x = tmp.nonPAR, subject = MakeGrangeObj(genes))
         m <- d[which(elementMetadata(d)$distance < distance ), ]
         tmp.nonPAR <- tmp.nonPAR[queryHits(m)]
@@ -517,11 +517,11 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
 
   all.RepeatName <- merge(as.data.frame(rmsk.counts[[1]]),as.data.frame(observed.counts), by = "RepeatName")
   all.RepeatName <- merge(all.RepeatName, expected.counts[,c("RepeatName","Mean")], by = "RepeatName")
-  colnames(all.RepeatName) <- c("RepeatName","rmsk","observe","expected")
+  colnames(all.RepeatName) <- c("RepeatName","rmsk","observed","expected")
 
   test <- function(x, p, n){binom.test(x, p, n)}
 
-  b.rName <- mapply(test, all.RepeatName$observe, all.RepeatName$rmsk, (all.RepeatName$expected/all.RepeatName$rmsk))
+  b.rName <- mapply(test, all.RepeatName$observed, all.RepeatName$rmsk, (all.RepeatName$expected/all.RepeatName$rmsk))
   all.RepeatName$p.value <- do.call(rbind, b.rName["p.value",])
   all.RepeatName$p.adjust.value <- p.adjust(all.RepeatName$p.value, method = "fdr", n = length(all.RepeatName$p.value))
 
@@ -599,6 +599,8 @@ getInterval <- function(input, dataset){
 
   hit<-which(data$strand=="-1")
   data$strand[hit]<-"-"
+
+  data$seqnames<- sapply(1:nrow(data), function(x) gsub("^\\d$", paste0("chr",data$seqnames[x]), data$seqnames[x]))
 
   return(data)
 }

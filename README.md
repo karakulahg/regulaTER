@@ -82,12 +82,14 @@ FindMotifs(df = test, repeatMaskerFile = rmsk, outDir = "../test/", homerPath = 
 5.
 ```
 
+input <- "../test/mm10_test/gene_symbols.txt"
+dataset <- "mmusculus_gene_ensembl"
+
 genes <- ToolX::getInterval(input,dataset)
-genes$seqnames<- sapply(1:nrow(genes), function(x) gsub("^\\d$", paste0("chr",genes$seqnames[x]), genes$seqnames[x]))
 
 start <- Sys.time()
 print(start)
-result100 <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 500, distance = 10000000000000000000000)
+result100 <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 100, distance = 10000000000000000000000)
 end <- Sys.time()
 print(end)
 print(paste("sh time :", (end - start )))

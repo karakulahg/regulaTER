@@ -5,4 +5,4 @@ exportPattern("IdentifyDEGLinkedRepeats")
 exportPattern("FindMotifs")
 exportPattern("GetOverlap")
 exportPattern("EstimateRepeatAge")
-
+exportPattern("getInterval")
