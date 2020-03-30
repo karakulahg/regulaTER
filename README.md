@@ -65,7 +65,7 @@ pathList <- list("Promoter" = "../test/mm10_test/mm10_promoter.bed",
 
 
 ```
-4.
+4. With the previously generated peak file and repeat masker objects, as well as the list of file paths to BED files defining genomic regions and the file with chromosome sizes, calculate the fold enrichment and p-values of repeat elements associated with input peak regions. If a broadPeak file is used, the format should be changed as "broad", and minoverlap should be given an integer value, defining how many minimum bases should a peak and a repeat element overlap before they are considered associated. Higher shuffle numbers give better results, but increase operation time.
 ```
 start <- Sys.time()
 print(start)
