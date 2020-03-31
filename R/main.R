@@ -186,39 +186,39 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
   write.table(as.data.frame(gr.Promoter), file="Promoter.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Promoter.bed -g ",pathList$genomeSizePath," -incl ",pathList$Promoter," > shuffled.promoters "))
   sh.promoter <- read.csv("shuffled.promoters", header = F, sep = "\t")
-  system("rm shuffled.promoters Promoter.bed")
+  # system("rm shuffled.promoters Promoter.bed")
 
   write.table(as.data.frame(gr.Exon), file="Exon.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Exon.bed -g ",pathList$genomeSizePath," -incl ",pathList$Exon," > shuffled.exons "))
   sh.exon <- read.csv("shuffled.exons", header = F, sep = "\t")
-  system("rm shuffled.exons Exon.bed")
+  # system("rm shuffled.exons Exon.bed")
 
   write.table(as.data.frame(gr.Intron), file="Intron.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Intron.bed -g ",pathList$genomeSizePath," -incl ",pathList$Intron," > shuffled.introns "))
   sh.intron <- read.csv("shuffled.introns", header = F, sep = "\t")
-  system("rm shuffled.introns Intron.bed")
+  # system("rm shuffled.introns Intron.bed")
 
   write.table(as.data.frame(gr.5UTR), file="FiveUTR.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i FiveUTR.bed -g ",pathList$genomeSizePath," -incl ",pathList$`5UTR`," > shuffled.5UTR "))
   sh.5UTR <- read.csv("shuffled.5UTR", header = F, sep = "\t")
-  system("rm shuffled.5UTR FiveUTR.bed")
+  # system("rm shuffled.5UTR FiveUTR.bed")
 
   write.table(as.data.frame(gr.3UTR), file="ThreeUTR.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i ThreeUTR.bed -g ",pathList$genomeSizePath," -incl ",pathList$`3UTR`," > shuffled.3UTR "))
   sh.3UTR <- read.csv("shuffled.3UTR", header = F, sep = "\t")
-  system("rm shuffled.3UTR ThreeUTR.bed")
+  # system("rm shuffled.3UTR ThreeUTR.bed")
 
   write.table(as.data.frame(gr.Downstream), file="Downstream.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Downstream.bed -g ",pathList$genomeSizePath," -incl ",pathList$Downstream," > shuffled.downstream "))
   sh.downstream <- read.csv("shuffled.downstream", header = F, sep = "\t")
-  system("rm shuffled.downstream Downstream.bed")
+  # system("rm shuffled.downstream Downstream.bed")
 
   write.table(as.data.frame(gr.Intergenic), file="Intergenic.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Intergenic.bed -g ",pathList$genomeSizePath," -excl ",pathList$Promoter,
                " -excl ",pathList$Exon," -excl ",pathList$Intron," -excl ",pathList$`5UTR`," -excl ",pathList$`3UTR`,
                " -excl ",pathList$Downstream," > shuffled.intergenic "))
   sh.intergenic <- read.csv("shuffled.intergenic", header = F, sep = "\t")
-  system("rm shuffled.intergenic Intergenic.bed")
+  # system("rm shuffled.intergenic Intergenic.bed")
 
   all.shuffeledAnnots <- rbind(sh.promoter, sh.exon, sh.intron, sh.5UTR, sh.3UTR, sh.intergenic, sh.downstream)
   colnames(all.shuffeledAnnots) <- colnames(peakFile)
@@ -253,7 +253,7 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
       start <- Sys.time()
       tmp <-  ShufflePeaks(inputPeakFile, pathList)
       end <- Sys.time()
-      print(paste("sh time :", (end - start )))
+      print(paste("shuffle ",i," - sh time :", (end - start )))
 
       start <- Sys.time()
       tmp.counts <- CountIntersect(repeatMaskerFile, tmp, format, minoverlap)
@@ -343,7 +343,7 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
     binom.test.results$RepeatType["obsOnTrueMean"][hit.inf] <- NA
 
   }
-
+  system("rm shuffled.* *.bed")
   return(binom.test.results)
 
 }

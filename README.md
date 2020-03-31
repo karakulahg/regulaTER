@@ -48,7 +48,7 @@ raw.rmsk<-biomartr::read_rm("../test/mm10_test/mm10.fa.out")
 
 # input.file <- read.csv("../test/Annotated-Sorted_09_018U_004MSoton_MCF7-ZEB1_unind_Pol2_hs_i91_peaks.narrowPeak.tsv", header=TRUE, stringsAsFactors=FALSE, sep = "\t")
 
-input.file <- read.table("../test/mm10_test/Annotated_forebrain_16_5_rep_1_peaks_narrowPeak.tsv", sep = "\t", header=TRUE)
+peak.16_5 <- read.table("../test/mm10_test/AnnotatedPeaks/Annotated_forebrain_16_5_rep_1_peaks.narrowPeak", sep = "\t", header=TRUE)
 
 ```
 3. Using the Table Browser tool of UCSC Genome Browser, or another similar method, generate BED files for the following genomic regions, as compatible with ChIPseeker annotations. Promoter region is defined as 3000 bases upstream of the gene region, while Downstream region is defined as 3000 bases downstream. The genomeSizePath should point to a file with two columns, with the first column corresponding to chromosome names in order, and the second column corresponding to chromosome size.
@@ -69,7 +69,7 @@ pathList <- list("Promoter" = "../test/mm10_test/mm10_promoter.bed",
 ```
 start <- Sys.time()
 print(start)
-test <- EnrichPARs(inputPeakFile = input.file, pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = raw.rmsk, format="narrow", minoverlap=0L)
+enrich.peak.16.5 <- EnrichPARs(inputPeakFile = peak.16_5 , pathList = pathList, numberOfShuffle = 1000, repeatMaskerFile = raw.rmsk, format="narrow", minoverlap=0L)
 end <- Sys.time()
 print(end)
 print(paste("sh time :", (end - start )))
