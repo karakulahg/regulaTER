@@ -233,7 +233,7 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
 
 #### get shuffle genome interval with using bedr shuffle function ####
 
-EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerFile, format, minoverlap=0L){
+EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerFile, format, minoverlap=0L, outdir){
 
   gr.input <- MakeGrangeObj(inputPeakFile = inputPeakFile)
   observe.counts <- CountIntersect(repeatMaskerFile, gr.input, format, minoverlap)
@@ -321,6 +321,10 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
   all.RepeatType$p.adjust.value <- p.adjust(all.RepeatType$p.value, method = "fdr", n = length(all.RepeatType$p.value))
   all.RepeatType$obsOnTrueMean <- all.RepeatType$observed/all.RepeatType$TrueMean
 
+  write.csv(all.RepeatName,paste0(outdir,"_",numberOfShuffle,"Shuffle_ALLRepeatName.csv"), row.names = F, quote = F)
+  write.csv(all.RepeatFamily,paste0(outdir,"_",numberOfShuffle,"Shuffle_ALLRepeatFamily.csv"), row.names = F, quote = F)
+  write.csv(all.RepeatType,paste0(outdir,"_",numberOfShuffle,"Shuffle_ALLRepeatType.csv"), row.names = F, quote = F)
+
   binom.test.results <- list("RepeatName" = subset(all.RepeatName, p.value < 1e-03 & observed > expected), "RepeatFamily" = subset(all.RepeatFamily, p.value < 1e-03 & observed > expected), "RepeatType" = subset(all.RepeatType, p.value < 1e-03 & observed > expected))
 
   if(nrow(binom.test.results$RepeatName)!=0){
@@ -344,6 +348,7 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
 
   }
   system("rm shuffled.* *.bed")
+  write.csv(binom.test.results[1],paste0(outdir,"_",numberOfShuffle,"Shuffle_SubsetRepeatName.csv"), row.names = F, quote = F)
   return(binom.test.results)
 
 }
