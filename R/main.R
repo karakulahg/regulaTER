@@ -100,8 +100,9 @@ GetOverlap <- function(rmsk, gr.input, format, minoverlap=0L, goal="base"){
   if(format == "narrow"){
 
     if(ncol(elementMetadata(gr.input))!= 0){
-      GenomicRanges::start(gr.input) <- GenomicRanges::start(gr.input) + as.data.frame(gr.input)[,10]
-      GenomicRanges::end(gr.input) <- GenomicRanges::start(gr.input) + 1
+      start <- GenomicRanges::start(gr.input)
+      GenomicRanges::end(gr.input) <- start + as.data.frame(gr.input)[,10] + 1
+      GenomicRanges::start(gr.input) <- start + as.data.frame(gr.input)[,10]
     }
 
   }
