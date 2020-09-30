@@ -44,7 +44,8 @@ library(biomaRt)
 
 raw.rmsk<-biomartr::read_rm("../test_ToolX/hg38/hg38.fa.out.gz") # repeat annotation
 
-peakfile <- read.table("../ZGA-SRP112718-ToolX/Data/Annotated_finalPeakList_SRX3013845_SRX3013846.narrowPeak.gz.tsv", sep = "\t", header=TRUE)
+library(ChIPseeker)
+peak <-readPeakFile("../ZGA-SRP112718-ToolX/ATACSeq-Pipelines/outputs/AnnotatedNarrowPeaks/Annotated_FinalPeakListSRX3013845_SRX3013846_Human_2-cell.narrowPeak.filt.gz.tsv")
 
 ```
 3. Using the Table Browser tool of UCSC Genome Browser, or another similar method, generate BED files for the following genomic regions, as compatible with ChIPseeker annotations. Promoter region is defined as 3000 bases upstream of the gene region, while Downstream region is defined as 3000 bases downstream. The genomeSizePath should point to a file with two columns, with the first column corresponding to chromosome names in order, and the second column corresponding to chromosome size.
@@ -65,7 +66,7 @@ pathList <- list("Promoter" = "../test_ToolX/hg38/hg38_regions/hg38_regions/hg38
 ```
 start <- Sys.time()
 print(start)
-enrich.peak <- EnrichPARs(inputPeakFile = peakfile , pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = raw.rmsk, format="narrow", minoverlap=0L, outdir="../test_ToolX/hg38/outputs/peak")
+enrich.peak <- EnrichPARs(inputPeakFile = peak , pathList = pathList, numberOfShuffle = 5, repeatMaskerFile = raw.rmsk, format="narrow", minoverlap=0L, outdir="/home/nazmiye/ibg/ZGA-SRP112718-ToolX/ATACSeq-Pipelines/outputs/ToolX-Results/")
 end <- Sys.time()
 print(end)
 print(paste("sh time :", (end - start )))
@@ -121,3 +122,8 @@ loaded via a namespace (and not attached):
 [1] compiler_3.6.0 tools_3.6.0   
 
 ```
+
+
+
+
+
