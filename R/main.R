@@ -1,4 +1,6 @@
 
+source("R/par_plots.R")
+
 #### countIntersect description ####
 #
 #  Takes repeatMaster file and annotated narrowPeak file as input
@@ -156,9 +158,7 @@ CountElements <- function(gr.rmsk.matched, rmsk){
 
 
 
-CountIntersect <-
-  function(repeatMaskerFile,
-           inputPeakFile, format, minoverlap=0L) {
+CountIntersect <-function(repeatMaskerFile,inputPeakFile, format, minoverlap=0L) {
 
     gr.input <- inputPeakFile
     rmsk <- FormattingRM(repeatMaskerFile)
@@ -422,19 +422,19 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
 
   if(nrow(df.name) > 0){
 
-    find_motifs_genome(df.name, paste0(outDir,"/margeOutput/asRepeatName"), "hg19", overwrite = T)
+    find_motifs_genome(df.name, paste0(outDir,"/margeOutput/asRepeatName"), "hg38", overwrite = T)
 
   }
 
   if(nrow(df.family) > 0){
 
-    find_motifs_genome(df.family, paste0(outDir,"/margeOutput/asRepeatFamily"), "hg19", overwrite = T)
+    find_motifs_genome(df.family, paste0(outDir,"/margeOutput/asRepeatFamily"), "hg38", overwrite = T)
 
   }
 
   if(nrow(df.type) > 0){
 
-    find_motifs_genome(df.type, paste0(outDir,"/margeOutput/asRepeatType"), "hg19", overwrite = T)
+    find_motifs_genome(df.type, paste0(outDir,"/margeOutput/asRepeatType"), "hg", overwrite = T)
 
   }
 
@@ -620,7 +620,7 @@ EstimateRepeatAge <- function(repeatMasterFile, peakFile, substRate){
 getInterval <- function(input, dataset){
 
   library(biomaRt)
-  ensembl = biomaRt::useEnsembl(biomart="ensembl", dataset="mmusculus_gene_ensembl", verbose = TRUE)
+  ensembl = biomaRt::useEnsembl(biomart="ensembl", dataset= dataset, verbose = TRUE)
   df<-scan(input,character())
 
   gene_ids <- getBM(attributes = c("ensembl_gene_id", "external_gene_name"), filters = c("external_gene_name"), values = df, mart = ensembl, verbose = T)
@@ -646,3 +646,35 @@ getInterval <- function(input, dataset){
 
   return(data)
 }
+
+
+MakePlots <- function(enrichPARsResult, stage, outDir){
+
+  Rname <- enrichPARsResult$RepeatName
+  Rname <- Filtering(Rname, stage)
+
+  MakeFigure1(Rname, outDir, "RepeatName")
+  MakeFigure2(Rname, outDir, "RepeatName")
+  MakeFigure3(Rname, outDir, "RepeatName")
+  MakeFigure4(Rname, outDir, "RepeatName")
+
+  Rfamily <- enrichPARsResult$RepeatFamily
+  Rfamily <- Filtering(Rfamily, stage)
+
+  MakeFigure1(Rfamily, outDir, "RepeatFamily")
+  MakeFigure2(Rfamily, outDir, "RepeatFamily")
+  MakeFigure3(Rfamily, outDir, "RepeatFamily")
+  MakeFigure4(Rfamily, outDir, "RepeatFamily")
+
+  Rtype <- enrichPARsResult$RepeatType
+  Rtype <- Filtering(Rtype, stage)
+
+  MakeFigure1(Rtype, outDir, "RepeatType")
+  MakeFigure2(Rtype, outDir, "RepeatType")
+  MakeFigure3(Rtype, outDir, "RepeatType")
+  MakeFigure4(Rtype, outDir, "RepeatType")
+
+
+}
+
+
