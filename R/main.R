@@ -399,22 +399,11 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
   binom.test.results <- df
 
   name <- rmsk[which(rmsk$repeat_name %in% as.vector(binom.test.results$RepeatName$RepeatName)),]
-  family <- rmsk[which(rmsk$repeat_family %in% as.vector(binom.test.results$RepeatFamily$RepeatFamily)),]
-  type <- rmsk[which(rmsk$repeat_type %in% as.vector(binom.test.results$RepeatType$RepeatType)),]
 
   name$ID <- row.names(name)
   df.name <- name[,c(1,2,3,8,5,4)]
 
-  family$ID <- row.names(family)
-  df.family <- family[,c(1,2,3,8,5,4)]
-
-  type$ID <- row.names(type)
-  df.type <- type[,c(1,2,3,8,5,4)]
-
-
   write.table(df.name, file = paste0(outDir,"/repeatName.bed"), quote=F, sep="\t", row.names=F, col.names=F)
-  write.table(df.family, file = paste0(outDir,"/repeatFamily.bed"), quote=F, sep="\t", row.names=F, col.names=F)
-  write.table(df.type, file = paste0(outDir,"/repeatType.bed"), quote=F, sep="\t", row.names=F, col.names=F)
 
   library(marge)
   options("homer_path" = homerPath)
@@ -422,22 +411,23 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
 
   if(nrow(df.name) > 0){
 
-    find_motifs_genome(df.name, paste0(outDir,"/margeOutput/asRepeatName"), "hg38", overwrite = T)
 
-  }
+    for (i in 1:10) {
+      dir <-paste0(outDir,"/margeOutput/asRepeatName/",df.name[i,]$repeat_name)
+      print(dir)
+      dir.create(dir,recursive = T)
+      find_motifs_genome(df.name[i,], dir, "hg38", overwrite = T)
+    }
 
-  if(nrow(df.family) > 0){
+   #  motif <- function(df){
+   #    find_motifs_genome(df, dir, "hg38", overwrite = T)
+   #  }
+   #
+   # apply(df.name[2,], 1, function(df){
+   #
+   # })
 
-    find_motifs_genome(df.family, paste0(outDir,"/margeOutput/asRepeatFamily"), "hg38", overwrite = T)
-
-  }
-
-  if(nrow(df.type) > 0){
-
-    find_motifs_genome(df.type, paste0(outDir,"/margeOutput/asRepeatType"), "hg", overwrite = T)
-
-  }
-
+}
 
 }
 
