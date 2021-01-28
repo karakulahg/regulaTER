@@ -1,6 +1,7 @@
 # ToolX: An R package for ..
 This repo is currently under review. Citation information will be provided as soon as our work is accepted. 
 ### What is this package used for? 
+This package is used for analysis of repeat elements in the genome, more specifically transposable elements, and their association with accessible chromatin and gene expression regulatory elements. As input, it requires DNA accessibility data, such as that produced by ATAC-seq, and analyzed by an appropriate pipeline, a RepeatMasker file including information for genomic repeats, BED files describing the gene-related contexts of all genomic regions, and a list of differentially expressed genes in condition of choice compared to controls and their genomic coordinates.
 
 
 #### What are the dependencies for ToolX ?
@@ -27,7 +28,7 @@ devtools::install_github("karakulahg/ToolX")
 
 ### How does it work?
 
-1. Load the library:
+1. Install and load the following libraries:
 ```
 
 library(biomartr)
@@ -72,11 +73,9 @@ print(end)
 print(paste("sh time :", (end - start )))
 
 
-FindMotifs(df = test, repeatMaskerFile = rmsk, outDir = "../test/", homerPath = "~/Downloads/Tools/homer/")
-
 ```
 
-5.
+5. Using the EnrichPARs results, the peak file and repeat masker objects used as the input for EnrichPARs, and a user provided data frame of differentially expressed genes, the structure of which is described under the function documentation, calculate the fold enrichment and p-values of PARs located in input promoter regions. Higher shuffle numbers give better results, but increase operation time. Distance value defines desired length of promoter region from transcription start site. Longer distances cover more distal regulatory elements, but reduce precision of results.
 ```
 
 input <- "../test/mm10_test/gene_symbols.txt"
@@ -86,7 +85,7 @@ genes <- ToolX::getInterval(input,dataset)
 
 start <- Sys.time()
 print(start)
-result100 <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 100, distance = 10000000000000000000000)
+result100 <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 100, distance = 100000)
 end <- Sys.time()
 print(end)
 print(paste("sh time :", (end - start )))
@@ -94,9 +93,10 @@ print(paste("sh time :", (end - start )))
 
 ```
 
-6.
+6. Using the output of IdentifyDEGLinkedRepeats, as well as the repeat masker object used in the same function, identify which genomic motifs are enriched in promoter associated PARs. This function requires a local installation of HOMER, available on the [HOMER website](http://homer.ucsd.edu/homer/).
+
 ```
-estimate <- ToolX::EstimateRepeatAge(repeatMasterFile = raw.rmsk, peakFile = input.file, substRate = 4.5e-09)
+FindMotifs(df = test, repeatMaskerFile = rmsk, outDir = "../test/", homerPath = "~/Downloads/Tools/homer/")
 
 ```
 
