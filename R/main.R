@@ -1,5 +1,5 @@
 
-source("R/par_plots.R")
+source("R/plotScripts.R")
 
 #### countIntersect description ####
 #
@@ -83,7 +83,7 @@ CountRM <- function(rmsk){
 
 GetOverlap <- function(rmsk, gr.input, format, minoverlap=0L, goal="base"){
 
-  #### converts repeatMasker data frame into GRanges object ####
+  #### converts repeat Masker data frame into GRanges object ####
 
   library(GenomicRanges)
   gr.rmsk <- with(rmsk, GenomicRanges::GRanges(seqnames, IRanges(start, end), strand = strand))
@@ -177,7 +177,6 @@ CountIntersect <-function(repeatMaskerFile,inputPeakFile, format, minoverlap=0L)
 
 ShufflePeaks <- function(peakFile, pathList, seed = 0){
 
- # gr.input <- MakeGrangeObj(inputPeakFile = peakFile)
   gr.input <- peakFile
   write.table(gr.input, file="before.shuffle.input.peak.bed", quote=F, sep="\t", row.names=F, col.names=T)
 
@@ -189,43 +188,35 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
   gr.Intergenic <- gr.input[grepl('Intergenic', gr.input$annotation),]
   gr.Downstream <- gr.input[grepl('Downstream', gr.input$annotation),]
 
-
   write.table(gr.Promoter, file="Promoter.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Promoter.bed -g ",pathList$genomeSizePath," -incl ",pathList$Promoter," > shuffled.promoters "))
   sh.promoter <- read.csv("shuffled.promoters", header = F, sep = "\t")
-  # system("rm shuffled.promoters Promoter.bed")
 
   write.table(as.data.frame(gr.Exon), file="Exon.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Exon.bed -g ",pathList$genomeSizePath," -incl ",pathList$Exon," > shuffled.exons "))
   sh.exon <- read.csv("shuffled.exons", header = F, sep = "\t")
-  # system("rm shuffled.exons Exon.bed")
 
   write.table(as.data.frame(gr.Intron), file="Intron.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Intron.bed -g ",pathList$genomeSizePath," -incl ",pathList$Intron," > shuffled.introns "))
   sh.intron <- read.csv("shuffled.introns", header = F, sep = "\t")
-  # system("rm shuffled.introns Intron.bed")
 
   write.table(as.data.frame(gr.5UTR), file="FiveUTR.bed", quote=F, sep="\t", row.names=F, col.names=F)
-  system(paste(" bedtools shuffle -i FiveUTR.bed -g ",pathList$genomeSizePath," -incl ",pathList$`5UTR`," > shuffled.5UTR "))
-  sh.5UTR <- read.csv("shuffled.5UTR", header = F, sep = "\t")
-  # system("rm shuffled.5UTR FiveUTR.bed")
+  system(paste(" bedtools shuffle -i FiveUTR.bed -g ",pathList$genomeSizePath," -incl ",pathList$`5UTR`," > shuffled.FiveUTR "))
+  sh.5UTR <- read.csv("shuffled.FiveUTR", header = F, sep = "\t")
 
   write.table(as.data.frame(gr.3UTR), file="ThreeUTR.bed", quote=F, sep="\t", row.names=F, col.names=F)
-  system(paste(" bedtools shuffle -i ThreeUTR.bed -g ",pathList$genomeSizePath," -incl ",pathList$`3UTR`," > shuffled.3UTR "))
-  sh.3UTR <- read.csv("shuffled.3UTR", header = F, sep = "\t")
-  # system("rm shuffled.3UTR ThreeUTR.bed")
+  system(paste(" bedtools shuffle -i ThreeUTR.bed -g ",pathList$genomeSizePath," -incl ",pathList$`3UTR`," > shuffled.ThreeUTR "))
+  sh.3UTR <- read.csv("shuffled.ThreeUTR", header = F, sep = "\t")
 
   write.table(as.data.frame(gr.Downstream), file="Downstream.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Downstream.bed -g ",pathList$genomeSizePath," -incl ",pathList$Downstream," > shuffled.downstream "))
   sh.downstream <- read.csv("shuffled.downstream", header = F, sep = "\t")
-  # system("rm shuffled.downstream Downstream.bed")
 
   write.table(as.data.frame(gr.Intergenic), file="Intergenic.bed", quote=F, sep="\t", row.names=F, col.names=F)
   system(paste(" bedtools shuffle -i Intergenic.bed -g ",pathList$genomeSizePath," -excl ",pathList$Promoter,
                " -excl ",pathList$Exon," -excl ",pathList$Intron," -excl ",pathList$`5UTR`," -excl ",pathList$`3UTR`,
                " -excl ",pathList$Downstream," > shuffled.intergenic "))
   sh.intergenic <- read.csv("shuffled.intergenic", header = F, sep = "\t")
-  # system("rm shuffled.intergenic Intergenic.bed")
 
   all.shuffeledAnnots <- rbind(sh.promoter, sh.exon, sh.intron, sh.5UTR, sh.3UTR, sh.intergenic, sh.downstream)
   colnames(all.shuffeledAnnots) <- colnames(as.data.frame(peakFile))
@@ -242,7 +233,6 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
 
 EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerFile, format, minoverlap=0L, outdir){
 
-  # gr.input <- MakeGrangeObj(inputPeakFile = inputPeakFile)
   gr.input <- inputPeakFile
   write.table(as.data.frame(gr.input), file="before.observed.input.peak.bed", quote=F, sep="\t", row.names=F, col.names=T)
   observe.counts <- CountIntersect(repeatMaskerFile, gr.input, format, minoverlap)
@@ -276,20 +266,9 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
       tmp.Rtype <- as.data.frame(tmp.counts[[3]])
       colnames(tmp.Rtype) <- c("RepeatType",i)
 
-
-      # write.csv(tmp.Rname,paste0(outdir,"_",i,"Shuffle_ALLRepeatName.csv"), row.names = F, quote = F)
-      # write.csv(tmp.Rfamily,paste0(outdir,"_",i,"Shuffle_ALLRepeatFamily.csv"), row.names = F, quote = F)
-      # write.csv(tmp.Rtype,paste0(outdir,"_",i,"Shuffle_ALLRepeatType.csv"), row.names = F, quote = F)
-
-
       Rname <- merge(Rname, tmp.Rname, by = "RepeatName")
       Rfamily <- merge(Rfamily, tmp.Rfamily, by = "RepeatFamily")
       Rtype <- merge(Rtype, tmp.Rtype, by = "RepeatType")
-
-      # write.csv(Rname,paste0(outdir,"_",i,"ShuffleMerged_ALLRepeatName.csv"), row.names = F, quote = F)
-      # write.csv(Rfamily,paste0(outdir,"_",i,"ShuffleMerged_ALLRepeatFamily.csv"), row.names = F, quote = F)
-      # write.csv(Rtype,paste0(outdir,"_",i,"ShuffleMerged_ALLRepeatType.csv"), row.names = F, quote = F)
-
 
     }
 
@@ -300,11 +279,6 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
     Rname$TrueMean <- rowMeans(Rname[,c(2:ncol(Rname))])
     Rfamily$TrueMean <-rowMeans(Rfamily[,c(2:ncol(Rfamily))])
     Rtype$TrueMean <- rowMeans(Rtype[,c(2:ncol(Rtype))])
-
-    # write.csv(Rname,paste0(outdir,"_ShuffleMerged_WithMeans_ALLRepeatName.csv"), row.names = F, quote = F)
-    # write.csv(Rfamily,paste0(outdir,"_ShuffleMerged_WithMeans_ALLRepeatFamily.csv"), row.names = F, quote = F)
-    # write.csv(Rtype,paste0(outdir,"_ShuffleMerged_WithMeans_ALLRepeatType.csv"), row.names = F, quote = F)
-
 
     expected.counts <- list(Rname,Rfamily,Rtype)
 
@@ -357,35 +331,9 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
   write.csv(all.RepeatType,paste0(outdir,"_",numberOfShuffle,"Final_Shuffle_beforeSubset_ALLRepeatType.csv"), row.names = F, quote = F)
 
   list <- list("RepeatName" = all.RepeatName, "RepeatFamily" = all.RepeatFamily, "RepeatType" = all.RepeatType)
+  system("rm shuffled.* *.bed")
   return(list)
-  # binom.test.results <- list("RepeatName" = subset(all.RepeatName, p.value < 1e-03 & observed > expected), "RepeatFamily" = subset(all.RepeatFamily, p.value < 1e-03 & observed > expected), "RepeatType" = subset(all.RepeatType, p.value < 1e-03 & observed > expected))
-  #
-  # if(nrow(binom.test.results$RepeatName)!=0){
-  #
-  #   hit.inf <- binom.test.results$RepeatName["obsOnTrueMean"] == "Inf"
-  #   binom.test.results$RepeatName["obsOnTrueMean"][hit.inf] <- NA
-  #
-  # }
-  #
-  # if(nrow(binom.test.results$RepeatFamily)!=0){
-  #
-  #   hit.inf <- binom.test.results$RepeatFamily["obsOnTrueMean"] == "Inf"
-  #   binom.test.results$RepeatFamily["obsOnTrueMean"][hit.inf] <- NA
-  #
-  # }
-  #
-  # if(nrow(binom.test.results$RepeatType)!=0){
-  #
-  #   hit.inf <- binom.test.results$RepeatType["obsOnTrueMean"] == "Inf"
-  #   binom.test.results$RepeatType["obsOnTrueMean"][hit.inf] <- NA
-  #
-  # }
-  # system("rm shuffled.* *.bed")
-  # write.csv(binom.test.results[1],paste0(outdir,"_",numberOfShuffle,"Shuffle_EnrichedRepeatName.csv"), row.names = F, quote = F)
-  # write.csv(binom.test.results[2],paste0(outdir,"_",numberOfShuffle,"Shuffle_EnrichedRepeatFamily.csv"), row.names = F, quote = F)
-  # write.csv(binom.test.results[3],paste0(outdir,"_",numberOfShuffle,"Shuffle_EnrichedRepeatType.csv"), row.names = F, quote = F)
-  #
-  # return(binom.test.results)
+
 
 }
 
@@ -398,7 +346,7 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
   rmsk <- FormattingRM(repeatMaskerFile)
   binom.test.results <- df
 
-  name <- rmsk[which(rmsk$repeat_name %in% as.vector(binom.test.results$RepeatName$RepeatName)),]
+  name <- rmsk[which(rmsk$repeat_name %in% as.vector(binom.test.results$RepeatName)),]
 
   name$ID <- row.names(name)
   df.name <- name[,c(1,2,3,8,5,4)]
@@ -410,22 +358,12 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
   options(stringsAsFactors = F)
 
   if(nrow(df.name) > 0){
-
-
     for (i in 1:10) {
       dir <-paste0(outDir,"/margeOutput/asRepeatName/",df.name[i,]$repeat_name)
       print(dir)
       dir.create(dir,recursive = T)
       find_motifs_genome(df.name[i,], dir, "hg38", overwrite = T)
     }
-
-   #  motif <- function(df){
-   #    find_motifs_genome(df, dir, "hg38", overwrite = T)
-   #  }
-   #
-   # apply(df.name[2,], 1, function(df){
-   #
-   # })
 
 }
 
@@ -564,15 +502,13 @@ EstimateRepeatAge <- function(repeatMasterFile, peakFile, substRate){
 
   rmsk <- FormattingRM(repeatMasterFile, goal = "calcAge")
   gr.rmsk <- MakeGrangeObj(rmsk)
-  # gr.peak <- MakeGrangeObj(peakFile)
   gr.peak <- peakFile
-
 
   overlapped <- GetOverlap(rmsk = rmsk, gr.input = gr.peak, format = "narrow", goal = "calcAge")
 
   df.PAR <- as.data.frame(overlapped)
 
-  ## extract gr.rmsk not overlapping with gr.overlapped ganges
+  ## extract gr.rmsk not overlapping with gr.overlapped granges
   gr.nonPAR<-gr.rmsk[!gr.rmsk %over% overlapped,]
   df.nonPAR <- as.data.frame(gr.nonPAR)
 
@@ -604,25 +540,21 @@ EstimateRepeatAge <- function(repeatMasterFile, peakFile, substRate){
 }
 
 
-# input <- "../test/mm10_test/gene_symbols.txt"
-# dataset <- "mmusculus_gene_ensembl"
-# genes <- getInterval(input,dataset)
 getInterval <- function(input, dataset){
 
   library(biomaRt)
   ensembl = biomaRt::useEnsembl(biomart="ensembl", dataset= dataset, verbose = TRUE)
   df<-scan(input,character())
 
-  gene_ids <- getBM(attributes = c("ensembl_gene_id", "external_gene_name"), filters = c("external_gene_name"), values = df, mart = ensembl, verbose = T)
+  gene_ids <- getBM(attributes = c("ensembl_gene_id", "external_gene_name"), filters = c("external_gene_name"), values = df, mart = ensembl, verbose = T, useCache = FALSE)
 
   data <- getBM(attributes = c("ensembl_gene_id","external_gene_name",
                                "chromosome_name", "start_position", "end_position",
                                "strand"),
-
                 filters = c("ensembl_gene_id"), #listFilters(ensembl)
                 values = gene_ids$ensembl_gene_id,
                 mart=ensembl,
-                verbose = TRUE)
+                verbose = TRUE, useCache = FALSE)
 
   names(data)<-c("geneID","geneName","seqnames","start","end","strand")
 
@@ -638,31 +570,11 @@ getInterval <- function(input, dataset){
 }
 
 
-MakePlots <- function(enrichPARsResult, stage, outDir){
+MakePlots <- function(enrichPARsResult, outDir){
 
-  Rname <- enrichPARsResult$RepeatName
-  Rname <- Filtering(Rname, stage)
-
-  MakeFigure1(Rname, outDir, "RepeatName")
-  MakeFigure2(Rname, outDir, "RepeatName")
-  MakeFigure3(Rname, outDir, "RepeatName")
-  MakeFigure4(Rname, outDir, "RepeatName")
-
-  Rfamily <- enrichPARsResult$RepeatFamily
-  Rfamily <- Filtering(Rfamily, stage)
-
-  MakeFigure1(Rfamily, outDir, "RepeatFamily")
-  MakeFigure2(Rfamily, outDir, "RepeatFamily")
-  MakeFigure3(Rfamily, outDir, "RepeatFamily")
-  MakeFigure4(Rfamily, outDir, "RepeatFamily")
-
-  Rtype <- enrichPARsResult$RepeatType
-  Rtype <- Filtering(Rtype, stage)
-
-  MakeFigure1(Rtype, outDir, "RepeatType")
-  MakeFigure2(Rtype, outDir, "RepeatType")
-  MakeFigure3(Rtype, outDir, "RepeatType")
-  MakeFigure4(Rtype, outDir, "RepeatType")
+  MakePlotsRepeatName(enrichPARsResult$RepeatName, outDir)
+  MakePlotsRepeatType(enrichPARsResult$RepeatType, outDir)
+  MakePlotsRepeatFamily(enrichPARsResult$RepeatFamily, outDir)
 
 
 }
