@@ -30,13 +30,14 @@ devtools::install_github("karakulahg/ToolX")
 
 1. Install and load the following libraries:
 ```
-
+library(ToolX)
 library(biomartr)
 library(GenomicRanges)
 library(dplyr)
 library(valr)
-library(ToolX)
 library(biomaRt)
+library(marge)
+library(ChIPseeker)
 
 ```
 
