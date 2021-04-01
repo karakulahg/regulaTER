@@ -1,14 +1,6 @@
 
 source("R/plotScripts.R")
 
-#### countIntersect description ####
-#
-#  Takes repeatMaster file and annotated narrowPeak file as input
-#  Calculates number of repeats with overlapping peaks based on given category
-#  (to add: category member filtering, input peak file type, multiple file type support, overlap expectation for broadPeak)
-#
-#### countIntersect function ####
-
 MakeGrangeObj <- function(inputPeakFile){
 
 
@@ -32,7 +24,7 @@ MakeGrangeObj <- function(inputPeakFile){
   return(gr.input)
 }
 
-#### rearranges repeatMasker file for function convenience ####
+#### Re arranges repeat Masker file for function convenience ####
 FormattingRM <- function(rmsk, goal = "base"){
 
   library(biomartr)
@@ -79,7 +71,6 @@ CountRM <- function(rmsk){
 
   return(rmsk.counts)
 }
-
 
 GetOverlap <- function(rmsk, gr.input, format, minoverlap=0L, goal="base"){
 
@@ -156,8 +147,13 @@ CountElements <- function(gr.rmsk.matched, rmsk){
   return(all.counts)
 }
 
-
-
+#### count Intersect description ####
+#
+#  Takes repeatMaster file and annotated narrowPeak file as input
+#  Calculates number of repeats with overlapping peaks based on given category
+#  (to add: category member filtering, input peak file type, multiple file type support, overlap expectation for broadPeak)
+#
+#### count Intersect function ####
 CountIntersect <-function(repeatMaskerFile,inputPeakFile, format, minoverlap=0L) {
 
     gr.input <- inputPeakFile
@@ -173,9 +169,9 @@ CountIntersect <-function(repeatMaskerFile,inputPeakFile, format, minoverlap=0L)
 
   }
 
-
-
 ShufflePeaks <- function(peakFile, pathList, seed = 0){
+
+  #### get shuffle genome interval with using bedr shuffle function ####
 
   gr.input <- peakFile
   write.table(gr.input, file="before.shuffle.input.peak.bed", quote=F, sep="\t", row.names=F, col.names=T)
@@ -225,11 +221,6 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
   return(gr)
 
 }
-
-
-
-
-#### get shuffle genome interval with using bedr shuffle function ####
 
 EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerFile, format, minoverlap=0L, outdir){
 
@@ -325,6 +316,9 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
   all.RepeatType$p.value[all.RepeatType$observed < 11] <- NA
   all.RepeatType$p.adjust.value[all.RepeatType$observed < 11] <- NA
 
+  all.RepeatName[order(all.RepeatName$p.adjust.value),]
+  all.RepeatFamily[order(all.RepeatFamily$p.adjust.value),]
+  all.RepeatType[order(all.RepeatType$p.adjust.value),]
 
   write.csv(all.RepeatName,paste0(outdir,"_",numberOfShuffle,"Final_Shuffle_beforeSubset_ALLRepeatName.csv"), row.names = F, quote = F)
   write.csv(all.RepeatFamily,paste0(outdir,"_",numberOfShuffle,"Final_Shuffle_beforeSubset_ALLRepeatFamily.csv"), row.names = F, quote = F)
@@ -337,11 +331,7 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
 
 }
 
-
-####
-
-
-FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
+FindMotifs <- function(df ,repeatMaskerFile, genome, outDir, homerPath){
 
   rmsk <- FormattingRM(repeatMaskerFile)
   binom.test.results <- df
@@ -362,13 +352,12 @@ FindMotifs <- function(df ,repeatMaskerFile, outDir, homerPath){
       dir <-paste0(outDir,"/margeOutput/asRepeatName/",df.name[i,]$repeat_name)
       print(dir)
       dir.create(dir,recursive = T)
-      find_motifs_genome(df.name[i,], dir, "hg38", overwrite = T)
+      find_motifs_genome(df.name[i,], dir, genome, overwrite = T)
     }
 
 }
 
 }
-
 
 IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numberOfShuffle = 100, distance = 100000){
 
@@ -384,7 +373,6 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
   result.overlapped <- overlapped[queryHits(m)]
 
   observed.counts <- CountElements(result.overlapped, rmsk)[[1]]
-
 
   gr.rmsk <- MakeGrangeObj(rmsk)
 
@@ -411,12 +399,9 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
         }
       }else{ isfirsttime == "true"
              last.nonPAR <- part.nonPAR}
-
-
     }
 
   }
-
 
 
   #### converts matched GRanges object into data frame and counts instances of given column name ####
@@ -432,7 +417,6 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
   }
 
   expected.counts <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
-
 
   if(numberOfShuffle > 1){
 
@@ -457,9 +441,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
         }else{ isfirsttime == "true"
                last.nonPAR <- tmp.nonPAR}
 
-
       }
-
 
       #### converts matched GRanges object into data frame and counts instances of given column name ####
 
@@ -479,9 +461,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
     names(expected.counts)[2] <- "Mean"
   }
 
-
   rmsk.counts <- CountRM(rmsk)
-
 
   all.RepeatName <- merge(as.data.frame(rmsk.counts[[1]]),as.data.frame(observed.counts), by = "RepeatName")
   all.RepeatName <- merge(all.RepeatName, expected.counts[,c("RepeatName","Mean")], by = "RepeatName")
@@ -493,10 +473,10 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
   all.RepeatName$p.value <- do.call(rbind, b.rName["p.value",])
   all.RepeatName$p.adjust.value <- p.adjust(all.RepeatName$p.value, method = "fdr", n = length(all.RepeatName$p.value))
 
+  all.RepeatName[order(all.RepeatName$p.adjust.value),]
+
   return(all.RepeatName)
-
 }
-
 
 EstimateRepeatAge <- function(repeatMasterFile, peakFile, substRate){
 
@@ -539,7 +519,6 @@ EstimateRepeatAge <- function(repeatMasterFile, peakFile, substRate){
 
 }
 
-
 getInterval <- function(input, dataset){
 
   library(biomaRt)
@@ -551,7 +530,7 @@ getInterval <- function(input, dataset){
   data <- getBM(attributes = c("ensembl_gene_id","external_gene_name",
                                "chromosome_name", "start_position", "end_position",
                                "strand"),
-                filters = c("ensembl_gene_id"), #listFilters(ensembl)
+                filters = c("ensembl_gene_id"), # listFilters(ensembl)
                 values = gene_ids$ensembl_gene_id,
                 mart=ensembl,
                 verbose = TRUE, useCache = FALSE)
@@ -568,7 +547,6 @@ getInterval <- function(input, dataset){
 
   return(data)
 }
-
 
 MakePlots <- function(enrichPARsResult, outDir){
 

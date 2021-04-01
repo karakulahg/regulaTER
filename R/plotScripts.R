@@ -3,7 +3,6 @@ options(stringsAsFactors = F)
 library(ggplot2)
 
 
-
 MakePlotsRepeatName <- function(repeat.names, outDir){
 
   #### plotting script ####
@@ -50,20 +49,9 @@ MakePlotsRepeatName <- function(repeat.names, outDir){
                                                                                                                                                                                                                                                       sec.axis = sec_axis( ~ . * coeff, name = "Ratio of Observed Repeats")) + theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.7))
       ggsave(paste0(outDir,"/Fig2_RepeatName.pdf"), width = 4, height = 4)
 
-
     }
-
-
-
   }
-
 }
-
-
-
-
-
-
 
 MakePlotsRepeatType <- function(repeat.types, outDir){
 
@@ -111,20 +99,9 @@ MakePlotsRepeatType <- function(repeat.types, outDir){
                                                                                                                                                                                                                                                       sec.axis = sec_axis( ~ . * coeff, name = "Ratio of Observed Repeats")) + theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.7))
       ggsave(paste0(outDir,"/Fig2_RepeatType.pdf"), width = 4, height = 4)
 
-
     }
-
-
-
   }
-
 }
-
-
-
-
-
-
 
 MakePlotsRepeatFamily <- function(repeat.families, outDir){
 
@@ -171,12 +148,7 @@ MakePlotsRepeatFamily <- function(repeat.families, outDir){
       ggplot(repeat.families.sub[repeat.families.sub$is.significant == TRUE,], aes(x = RepeatFamily, group = 1)) + geom_col(aes(y = observed)) + geom_line(aes(y = (observed / rmsk) / coeff)) + theme_light() + labs(x = "Repeat Name") + scale_y_continuous(name = "Observed Repeats",
                                                                                                                                                                                                                                                               sec.axis = sec_axis( ~ . * coeff, name = "Ratio of Observed Repeats")) + theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.7))
       ggsave(paste0(outDir,"/Fig2.pdf"), width = 4, height = 4)
-
-
     }
-
-
-
   }
-
 }
+
