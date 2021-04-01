@@ -29,7 +29,7 @@ integer used as seed value to obtain shuffle results. It is 0 by default and wil
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
-ChIPseeker annotations are divided into seven major classes. Promoter regions are identified as up to 3 KB upstream of transcription start site, while downstream regions are identified as up to 3 KB downstream of transcription end site. Intergenic regions, while not explicitly defined for this function, are identifed as any genomic region that does not fit in with any other annotation class. These BED files can be obtained via [UCSC Genome Browser](https://genome.ucsc.edu/index.html) using the Table Browser tool, or similar tools for other annotations of the user's choosing.
+ChIPseeker annotations are divided into seven major classes. Promoter regions are identified as up to 3 KB upstream of transcription start site, while downstream regions are identified as up to 3 KB downstream of transcription end site. Intergenic regions, while not explicitly defined for this function, are identifed as any genomic region that does not fit in with any other annotation class. These BED files can be obtained via \href{https://genome.ucsc.edu/index.html}{UCSC Genome Browser} using the Table Browser tool, or similar tools for other annotations of the user's choosing.
 
 genomeSizePath points to a file with two columns, corresponding to chromosome name and size, delimited by tabs.
 }

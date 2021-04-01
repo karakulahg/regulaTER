@@ -20,7 +20,7 @@ data frame containing peak intervals and annotation.
 }
   \item{pathList}{
 %%     ~~Describe \code{pathList} here~~
-a list of length 7, with the names "Promoter", "Exon", "Intron", "5UTR", "3UTR", "Downstream", and "genomeSizePath", and character values declaring the file paths of BED files identifying genomic regions of respective annotations and chromosome sizes. Refer to \link{EnrichPARs} for further information.
+a list of length 7, with the names "Promoter", "Exon", "Intron", "5UTR", "3UTR", "Downstream", and "genomeSizePath", and character values declaring the file paths of BED files identifying genomic regions of respective annotations and chromosome sizes. Refer to \link{ShufflePeaks} for further information.
 }
   \item{numberOfShuffle}{
 %%     ~~Describe \code{numberOfShuffle} here~~

@@ -49,7 +49,7 @@ Heinz S, Benner C, Spann N, Bertolino E et al. Simple Combinations of Lineage-De
 %%  \item{comp2 }{Description of 'comp2'}
 %% ...
 None. Generated output is placed in the directory identified by the outDir parameter. For details
-of the HOMER software output, please see [HOMER website](http://homer.ucsd.edu/homer/).
+of the HOMER software output, please see \href{http://homer.ucsd.edu/homer/}{HOMER website}.
 }
 \references{
 %% ~put references to the literature/web site here ~
