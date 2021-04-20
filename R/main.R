@@ -1,4 +1,4 @@
-
+options(warn=-1)
 source("R/plotScripts.R")
 
 MakeGrangeObj <- function(inputPeakFile){
@@ -331,31 +331,102 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
 
 }
 
-FindMotifs <- function(df ,repeatMaskerFile, genome, outDir, homerPath){
+
+
+calculate_background_par <- function(df, repeatMaskerFile, peakFile){
+
+  df <- df[which(df$p.adjust.value <= 0.05 & df$observed >= 10),]
 
   rmsk <- FormattingRM(repeatMaskerFile)
-  binom.test.results <- df
 
-  name <- rmsk[which(rmsk$repeat_name %in% as.vector(binom.test.results$RepeatName)),]
+  matched.rmsk <- rmsk[which(rmsk$repeat_name %in% as.vector(df$RepeatName)),]
 
-  name$ID <- row.names(name)
-  df.name <- name[,c(1,2,3,8,5,4)]
+  matched.rmsk$ID <- row.names(matched.rmsk) # for homer unique identifier
 
-  write.table(df.name, file = paste0(outDir,"/repeatName.bed"), quote=F, sep="\t", row.names=F, col.names=F)
+  gr.rmsk.par <- GetOverlap(matched.rmsk,
+                                peakFile, format = "narrow")
+
+  gr.matched.rmsk <- MakeGrangeObj(matched.rmsk)
+
+  ## extract gr.rmsk not overlapping with gr.overlapped granges
+  gr.nonPAR<-gr.matched.rmsk[!gr.matched.rmsk %over% gr.rmsk.par,]
+
+
+  list <- list("Query" = as.data.frame(gr.rmsk.par)[,c(1,2,3,4,5,6,7,8,11)], "Background" = as.data.frame(gr.nonPAR))
+
+  return(list)
+
+}
+
+
+calculate_background_linkedRepeats <- function(df, repeatMaskerFile, peakFile, genes, distance){
+
+  df <- df[which(df$p.adjust.value <= 0.05 & df$observed >= 10),]
+
+  rmsk <- FormattingRM(repeatMaskerFile)
+
+  matched.rmsk <- rmsk[which(rmsk$repeat_name %in% as.vector(df$RepeatName)),]
+
+  matched.rmsk$ID <- row.names(matched.rmsk) # for homer unique identifier
+
+  gr.rmsk.par <- GetOverlap(matched.rmsk,
+                            peakFile, format = "narrow")
+
+  gr.matched.rmsk <- MakeGrangeObj(matched.rmsk)
+
+
+  d <- distanceToNearest(x = gr.matched.rmsk, subject = MakeGrangeObj(genes))
+  m <- d[which(elementMetadata(d)$distance < distance ), ]
+  b <- d[which(elementMetadata(d)$distance >= distance ), ]
+  queries <- gr.matched.rmsk[queryHits(m)]
+  backgrounds <- gr.matched.rmsk[queryHits(b)]
+
+  list <- list("Query" = as.data.frame(queries), "Background" = as.data.frame(backgrounds))
+
+  return(list)
+
+}
+
+
+FindMotifs <- function(df, repeatMaskerFile, peak, genes, distance, genome, outDir, homerPath, type){
 
   library(marge)
   options("homer_path" = homerPath)
   options(stringsAsFactors = F)
 
-  if(nrow(df.name) > 0){
-    for (i in 1:10) {
-      dir <-paste0(outDir,"/margeOutput/asRepeatName/",df.name[i,]$repeat_name)
-      print(dir)
-      dir.create(dir,recursive = T)
-      find_motifs_genome(df.name[i,], dir, genome, overwrite = T)
-    }
+  if(type == "enrichPeak"){
+    list <- calculate_background_par(df, repeatMaskerFile, peak)
+    queries <- list$Query
+    backgrounds <- list$Background
+    Rnames <-  unique(queries$RepeatName)[1:10]
 
-}
+    if(length(Rnames) > 0){
+      for (name in Rnames) {
+        dir <-paste0(outDir,"/margeOutput/asRepeatName/", name)
+        print(dir)
+        dir.create(dir,recursive = T)
+        find_motifs_genome(queries[which(queries$RepeatName == name),], dir, genome, overwrite = T, background = backgrounds[which(backgrounds$repeat_name == name),])
+      }
+    }
+  }else if (type == "linkedRepeats"){
+    list <- calculate_background_linkedRepeats(df, repeatMaskerFile, peak,genes, distance)
+    queries <- list$Query
+    backgrounds <- list$Background
+    Rnames <-  unique(queries$repeat_name)[1:10]
+
+    if(length(Rnames) > 0){
+      for (name in Rnames) {
+        dir <-paste0(outDir,"/margeOutput/asRepeatName/", name)
+        print(dir)
+        dir.create(dir,recursive = T)
+        find_motifs_genome(queries[which(queries$RepeatName == name),], dir, genome, overwrite = T, background = backgrounds[which(backgrounds$repeat_name == name),])
+      }
+    }
+  }else{
+    return(print("please give correct type paremeter!"))
+  }
+
+
 
 }
 
@@ -376,7 +447,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
 
   gr.rmsk <- MakeGrangeObj(rmsk)
 
-  ## extract gr.rmsk not overlapping with gr.overlapped ganges
+  ## extract gr.rmsk not overlapping with gr.overlapped granges
   gr.nonPAR<-gr.rmsk[!gr.rmsk %over% overlapped,]
   last.nonPAR <- data.frame()
   isfirsttime <- "true"
@@ -522,7 +593,7 @@ EstimateRepeatAge <- function(repeatMasterFile, peakFile, substRate){
 getInterval <- function(input, dataset){
 
   library(biomaRt)
-  ensembl = biomaRt::useEnsembl(biomart="ensembl", dataset= dataset, verbose = TRUE)
+  ensembl = biomaRt::useEnsembl(biomart="ensembl", dataset= dataset, verbose = FALSE)
   df<-scan(input,character())
 
   gene_ids <- getBM(attributes = c("ensembl_gene_id", "external_gene_name"), filters = c("external_gene_name"), values = df, mart = ensembl, verbose = T, useCache = FALSE)
@@ -533,7 +604,7 @@ getInterval <- function(input, dataset){
                 filters = c("ensembl_gene_id"), # listFilters(ensembl)
                 values = gene_ids$ensembl_gene_id,
                 mart=ensembl,
-                verbose = TRUE, useCache = FALSE)
+                verbose = FALSE, useCache = FALSE)
 
   names(data)<-c("geneID","geneName","seqnames","start","end","strand")
 
