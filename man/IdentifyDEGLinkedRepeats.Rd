@@ -28,7 +28,7 @@ data frame containing repeat information, generated via \link{read_rm}.
 }
   \item{genes}{
 %%     ~~Describe \code{genes} here~~
-data frame with six columns - geneID: character vector identifying Ensembl IDs of differentially expressed genes, or another suitable unique interval identifier; geneName: character vector identifying official gene symbols of differentially expressed genes; seqnames: character vector identifying chromosome names of gene intervals; start: integer vector identifying starting nucleotides of gene intervals; end: integer vector identifying end nucleotides of gene intervals; strand: character vector identifying strand information of genes..
+data frame with six columns - geneID: character vector identifying Ensembl IDs of differentially expressed genes, or another suitable unique interval identifier; geneName: character vector identifying official gene symbols of differentially expressed genes; seqnames: character vector identifying chromosome names of gene intervals; start: integer vector identifying starting nucleotides of gene intervals; end: integer vector identifying end nucleotides of gene intervals; strand: character vector identifying strand information of genes.
 }
   \item{numberOfShuffle}{
 %%     ~~Describe \code{numberOfShuffle} here~~

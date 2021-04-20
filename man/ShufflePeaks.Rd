@@ -17,7 +17,7 @@ ShufflePeaks(peakFile, pathList, seed = 0)
 \arguments{
   \item{peakFile}{
 %%     ~~Describe \code{peakFile} here~~
-data frame of peak information of narrowPeak, broadPeak, or summits file formats, annotated via ChIPseeker.
+GRanges object of peak information in one of narrowPeak, broadPeak, or summits file formats, annotated via ChIPseeker and read using the readPeakFile function, with a minimum of seqnames, ranges, strand required columns, as well as summit and annotation columns.
 }
   \item{pathList}{
 %%     ~~Describe \code{pathList} here~~

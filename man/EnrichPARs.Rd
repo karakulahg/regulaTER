@@ -16,7 +16,7 @@ EnrichPARs(inputPeakFile, pathList, numberOfShuffle = 1, repeatMaskerFile, forma
 \arguments{
   \item{inputPeakFile}{
 %%     ~~Describe \code{inputPeakFile} here~~
-data frame containing peak intervals and annotation.
+GRanges object of peak information in one of narrowPeak, broadPeak, or summits file formats, annotated via ChIPseeker and read using the readPeakFile function, with a minimum of seqnames, ranges, strand required columns, as well as summit and annotation columns.
 }
   \item{pathList}{
 %%     ~~Describe \code{pathList} here~~
