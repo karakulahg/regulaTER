@@ -76,7 +76,7 @@ print(paste("sh time :", (end - start )))
 
 ```
 
-5. Using the EnrichPARs results, the peak file and repeat masker objects used as the input for EnrichPARs, and a user provided data frame of differentially expressed genes, the structure of which is described under the function documentation, calculate the fold enrichment and p-values of PARs located in input promoter regions. Higher shuffle numbers give better results, but increase operation time. Distance value defines desired length of promoter region from transcription start site. Longer distances cover more distal regulatory elements, but reduce precision of results.
+5. Using the EnrichPARs results, the peak file and repeat masker objects used as the input for EnrichPARs, and a user provided data frame of differentially expressed genes and their genomic intervals (such as those obtained from ensembl's BioMart or UCSC's Genome Browser), the structure of which is described under the function documentation, calculate the fold enrichment and p-values of PARs located in input promoter regions. Higher shuffle numbers give better results, but increase operation time. Distance value defines desired length of promoter region from transcription start site. Longer distances cover more distal regulatory elements, but reduce precision of results.
 ```
 
 input <- "../test/mm10_test/gene_symbols.txt"
