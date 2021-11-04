@@ -148,12 +148,12 @@ CountElements <- function(gr.rmsk.matched, rmsk){
 
 #### count Intersect description ####
 #
-#  Takes repeatMaster file and annotated narrowPeak file as input
+#  Takes repeat Master file and annotated narrow Peak file as input
 #  Calculates number of repeats with overlapping peaks based on given category
-#  (to add: category member filtering, input peak file type, multiple file type support, overlap expectation for broadPeak)
+#  (to add: category member filtering, input peak file type, multiple file type support, overlap expectation for broad Peak)
 #
 #### count Intersect function ####
-CountIntersect <-function(repeatMaskerFile,inputPeakFile, format, minoverlap=0L) {
+CountIntersect <-function(repeatMaskerFile, inputPeakFile, format, minoverlap=0L) {
   options(warn=-1)
   gr.input <- inputPeakFile
   rmsk <- FormattingRM(repeatMaskerFile)
@@ -223,16 +223,19 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
 
 EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerFile, format, minoverlap=0L, outdir){
   options(warn=-1)
+  # getting input Peak File as grange objects
   gr.input <- inputPeakFile
+  # to write peak file as bed file
   write.table(as.data.frame(gr.input), file="before.observed.input.peak.bed", quote=F, sep="\t", row.names=F, col.names=T)
+  # to count matched elements between repeat maskers and peaks
   observe.counts <- CountIntersect(repeatMaskerFile, gr.input, format, minoverlap)
-
+  # to call shuffle function
   gr <- ShufflePeaks(inputPeakFile, pathList)
-
+  # to count matched elements between repeat masker and shuffled peaks
   expected.counts <- CountIntersect(repeatMaskerFile, gr, format, minoverlap)
 
   if(numberOfShuffle > 1){
-
+    # to split different data frames of listed data frame for expected count list
     Rname <- as.data.frame(expected.counts[[1]])
     Rfamily <- as.data.frame(expected.counts[[2]])
     Rtype <- as.data.frame(expected.counts[[3]])
@@ -240,15 +243,18 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
     for(i in 1:numberOfShuffle){
 
       start <- Sys.time()
+      # to do shuffle each time
       tmp <-  ShufflePeaks(inputPeakFile, pathList)
       end <- Sys.time()
       print(paste("shuffle ",i," - sh time :", (end - start )))
 
       start <- Sys.time()
+      #to calculate count for each shuffelled peak and repeats
       tmp.counts <- CountIntersect(repeatMaskerFile, tmp, format, minoverlap)
       end <- Sys.time()
       print(paste("Countintersect time :", (end - start )))
 
+      # to separate data frames in new counted list
       tmp.Rname <- as.data.frame(tmp.counts[[1]])
       colnames(tmp.Rname) <- c("RepeatName",i)
       tmp.Rfamily <- as.data.frame(tmp.counts[[2]])
@@ -256,27 +262,33 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
       tmp.Rtype <- as.data.frame(tmp.counts[[3]])
       colnames(tmp.Rtype) <- c("RepeatType",i)
 
+      # merge types of counts with new calculated ones
       Rname <- merge(Rname, tmp.Rname, by = "RepeatName")
       Rfamily <- merge(Rfamily, tmp.Rfamily, by = "RepeatFamily")
       Rtype <- merge(Rtype, tmp.Rtype, by = "RepeatType")
 
     }
-
+    # to calculate means for each data frames and add new column
     Rname$Mean <- round(rowMeans(Rname[,c(2:ncol(Rname))]))
     Rfamily$Mean <- round(rowMeans(Rfamily[,c(2:ncol(Rfamily))]))
     Rtype$Mean <- round(rowMeans(Rtype[,c(2:ncol(Rtype))]))
 
+    # to calculate True means for each data frames and add new column
     Rname$TrueMean <- rowMeans(Rname[,c(2:ncol(Rname))])
     Rfamily$TrueMean <-rowMeans(Rfamily[,c(2:ncol(Rfamily))])
     Rtype$TrueMean <- rowMeans(Rtype[,c(2:ncol(Rtype))])
 
+    # to combine all manipulated data frames for counts results of types as list
     expected.counts <- list(Rname,Rfamily,Rtype)
 
   }
 
+  # to manipulate getting raw repeat masker file as more regular format
   rmsk <- FormattingRM(repeatMaskerFile)
+  # to calculate counts of types in repeat masker
   rmsk.counts <- CountRM(rmsk)
 
+  # to combine count results of each same types for repeat and observed and expected counts
 
   all.RepeatName <- merge(as.data.frame(rmsk.counts[[1]]),as.data.frame(observe.counts[[1]]), by = "RepeatName")
   all.RepeatName <- merge(all.RepeatName, as.data.frame(expected.counts[[1]][,c("RepeatName","Mean", "TrueMean")]), by = "RepeatName")
@@ -291,8 +303,10 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
   all.RepeatType <- merge(all.RepeatType, as.data.frame(expected.counts[[3]][,c("RepeatType","Mean", "TrueMean")]), by = "RepeatType")
   colnames(all.RepeatType) <- c("RepeatType","rmsk","observed","expected","TrueMean")
 
-
+  # calculate binomial test function
   test <- function(x, p, n){binom.test(x, p, n, alternative="greater", conf.level=0.95)}
+
+  # apply binomial test for each results
 
   b.rName <- mapply(test, all.RepeatName$observed, all.RepeatName$rmsk, (all.RepeatName$expected/all.RepeatName$rmsk))
   all.RepeatName$p.value <- do.call(rbind, b.rName["p.value",])
@@ -315,15 +329,19 @@ EnrichPARs <- function(inputPeakFile, pathList, numberOfShuffle=1, repeatMaskerF
   all.RepeatType$p.value[all.RepeatType$observed < 11] <- NA
   all.RepeatType$p.adjust.value[all.RepeatType$observed < 11] <- NA
 
+  # to sort results as p-adjust values
   all.RepeatName <- all.RepeatName[order(all.RepeatName$p.adjust.value),]
   all.RepeatFamily <- all.RepeatFamily[order(all.RepeatFamily$p.adjust.value),]
   all.RepeatType <- all.RepeatType[order(all.RepeatType$p.adjust.value),]
 
+  # write each type results as separately to output directory
   write.csv(all.RepeatName,paste0(outdir,"_",numberOfShuffle,"Final_Shuffle_beforeSubset_ALLRepeatName.csv"), row.names = F, quote = F)
   write.csv(all.RepeatFamily,paste0(outdir,"_",numberOfShuffle,"Final_Shuffle_beforeSubset_ALLRepeatFamily.csv"), row.names = F, quote = F)
   write.csv(all.RepeatType,paste0(outdir,"_",numberOfShuffle,"Final_Shuffle_beforeSubset_ALLRepeatType.csv"), row.names = F, quote = F)
 
+  # to collect results to a list and returned
   list <- list("RepeatName" = all.RepeatName, "RepeatFamily" = all.RepeatFamily, "RepeatType" = all.RepeatType)
+  # remove bed shuffle sub log files
   system("rm shuffled.* *.bed")
   return(list)
 
@@ -431,15 +449,21 @@ FindMotifs <- function(df, repeatMaskerFile, peak, genes, distance, genome, outD
 IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numberOfShuffle = 100, distance = 100000){
   options(warn=-1)
   count <- enrichPARsResult
-  repeatList <- count[[1]][which(count[[1]]["observed"] >= 2),c("RepeatName","observed")]
+  # getting enriched counts equals and more than 2 for observed repeat counts
+  repeatList <- count[[1]][which(count[[1]]["observed"] >= 2), c("RepeatName","observed")]
   gr.input <- peaks
+  # regulate repeat masker file
   rmsk <- FormattingRM(rmsk)
+  # overlapped repeats and peaks
   overlapped <- GetOverlap(rmsk = rmsk, gr.input = gr.input, format = "narrow")
+  # get overlapped has repeat names matched in enrich results
   repeats.overlapped <- subset(overlapped, RepeatName %in% repeatList$RepeatName)
+  # find overlapped results nearest to given genes
   d <- distanceToNearest(x = overlapped, subject = MakeGrangeObj(genes))
   m <- d[which(elementMetadata(d)$distance < distance ), ]
   result.overlapped <- overlapped[queryHits(m)]
 
+  # calculate repeats counts related genes
   observed.counts <- CountElements(result.overlapped, rmsk)[[1]]
 
   gr.rmsk <- MakeGrangeObj(rmsk)
@@ -452,8 +476,8 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
   if(nrow(repeatList) !=0 ){
 
     for(i in 1:nrow(repeatList)){
-
-      part.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observed[i]), ]
+      # to get match
+      part.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR),repeatList$observed[i]), ]
       d <- distanceToNearest(x = part.nonPAR, subject = MakeGrangeObj(genes))
       m <- d[which(elementMetadata(d)$distance < distance ), ]
       part.nonPAR <- part.nonPAR[queryHits(m)]
@@ -484,7 +508,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
     colnames(x) <- c("RepeatName", "nRepeatName")
   }
 
-  expected.counts <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
+  expected.counts <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName)))) #????
 
   if(numberOfShuffle > 1){
 
@@ -494,7 +518,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
       isfirsttime <- "true"
       for(j in 1:nrow(repeatList)){
 
-        tmp.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR), repeatList$observed[j]), ]
+        tmp.nonPAR <- gr.nonPAR[sample(length(gr.nonPAR),repeatList$observed[j]), ]
         d <- distanceToNearest(x = tmp.nonPAR, subject = MakeGrangeObj(genes))
         m <- d[which(elementMetadata(d)$distance < distance ), ]
         tmp.nonPAR <- tmp.nonPAR[queryHits(m)]
@@ -520,7 +544,7 @@ IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numbe
         x <- df.nonPAR %>% count(target)
         colnames(x) <- c("RepeatName", "nRepeatName")
       }
-      tmp <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
+      tmp <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName)))) ###???
       expected.counts <- merge(expected.counts, tmp, by = "RepeatName")
 
     }
