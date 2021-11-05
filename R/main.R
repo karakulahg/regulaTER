@@ -184,27 +184,27 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0){
   gr.Downstream <- gr.input[grepl('Downstream', gr.input$annotation),]
 
   write.table(gr.Promoter, file="Promoter.bed", quote=F, sep="\t", row.names=F, col.names=F)
-  system(paste(" bedtools shuffle -i Promoter.bed -g ",pathList$genomeSizePath," -incl ",pathList$Promoter," > shuffled.promoters "))
+  system(paste(" bedtools shuffle -i Promoter.bed -g ",pathList$genomeSizePath," -excl ",pathList$Promoter," > shuffled.promoters "))
   sh.promoter <- read.csv("shuffled.promoters", header = F, sep = "\t")
 
   write.table(as.data.frame(gr.Exon), file="Exon.bed", quote=F, sep="\t", row.names=F, col.names=F)
-  system(paste(" bedtools shuffle -i Exon.bed -g ",pathList$genomeSizePath," -incl ",pathList$Exon," > shuffled.exons "))
+  system(paste(" bedtools shuffle -i Exon.bed -g ",pathList$genomeSizePath," -excl ",pathList$Exon," > shuffled.exons "))
   sh.exon <- read.csv("shuffled.exons", header = F, sep = "\t")
 
   write.table(as.data.frame(gr.Intron), file="Intron.bed", quote=F, sep="\t", row.names=F, col.names=F)
-  system(paste(" bedtools shuffle -i Intron.bed -g ",pathList$genomeSizePath," -incl ",pathList$Intron," > shuffled.introns "))
+  system(paste(" bedtools shuffle -i Intron.bed -g ",pathList$genomeSizePath," -excl ",pathList$Intron," > shuffled.introns "))
   sh.intron <- read.csv("shuffled.introns", header = F, sep = "\t")
 
   write.table(as.data.frame(gr.5UTR), file="FiveUTR.bed", quote=F, sep="\t", row.names=F, col.names=F)
-  system(paste(" bedtools shuffle -i FiveUTR.bed -g ",pathList$genomeSizePath," -incl ",pathList$`5UTR`," > shuffled.FiveUTR "))
+  system(paste(" bedtools shuffle -i FiveUTR.bed -g ",pathList$genomeSizePath," -excl ",pathList$`5UTR`," > shuffled.FiveUTR "))
   sh.5UTR <- read.csv("shuffled.FiveUTR", header = F, sep = "\t")
 
   write.table(as.data.frame(gr.3UTR), file="ThreeUTR.bed", quote=F, sep="\t", row.names=F, col.names=F)
-  system(paste(" bedtools shuffle -i ThreeUTR.bed -g ",pathList$genomeSizePath," -incl ",pathList$`3UTR`," > shuffled.ThreeUTR "))
+  system(paste(" bedtools shuffle -i ThreeUTR.bed -g ",pathList$genomeSizePath," -excl ",pathList$`3UTR`," > shuffled.ThreeUTR "))
   sh.3UTR <- read.csv("shuffled.ThreeUTR", header = F, sep = "\t")
 
   write.table(as.data.frame(gr.Downstream), file="Downstream.bed", quote=F, sep="\t", row.names=F, col.names=F)
-  system(paste(" bedtools shuffle -i Downstream.bed -g ",pathList$genomeSizePath," -incl ",pathList$Downstream," > shuffled.downstream "))
+  system(paste(" bedtools shuffle -i Downstream.bed -g ",pathList$genomeSizePath," -excl ",pathList$Downstream," > shuffled.downstream "))
   sh.downstream <- read.csv("shuffled.downstream", header = F, sep = "\t")
 
   write.table(as.data.frame(gr.Intergenic), file="Intergenic.bed", quote=F, sep="\t", row.names=F, col.names=F)
