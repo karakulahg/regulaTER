@@ -449,19 +449,23 @@ FindMotifs <- function(df, repeatMaskerFile, peak, genes, distance, genome, outD
 IdentifyDEGLinkedRepeats <- function(enrichPARsResult, peaks, rmsk, genes, numberOfShuffle = 100, distance = 100000){
   options(warn=-1)
   count <- enrichPARsResult
+  write.csv(count[[1]],paste0("count.csv"), row.names = F, quote = F)
   # getting enriched counts equals and more than 2 for observed repeat counts
   repeatList <- count[[1]][which(count[[1]]["observed"] >= 2), c("RepeatName","observed")]
   gr.input <- peaks
+  write.csv(as.data.frame(gr.input),paste0("gr.input.csv"), row.names = F, quote = F)
   # regulate repeat masker file
   rmsk <- FormattingRM(rmsk)
   # overlapped repeats and peaks
   overlapped <- GetOverlap(rmsk = rmsk, gr.input = gr.input, format = "narrow")
   # get overlapped has repeat names matched in enrich results
   repeats.overlapped <- subset(overlapped, RepeatName %in% repeatList$RepeatName)
+  write.csv(repeats.overlapped,paste0("repeats.overlapped.csv"), row.names = F, quote = F)
   # find overlapped results nearest to given genes
-  d <- distanceToNearest(x = overlapped, subject = MakeGrangeObj(genes))
+  d <- distanceToNearest(x = repeats.overlapped, subject = MakeGrangeObj(genes))
+  write.csv(as.data.frame(d),paste0("d.csv"), row.names = F, quote = F)
   m <- d[which(elementMetadata(d)$distance < distance ), ]
-  result.overlapped <- overlapped[queryHits(m)]
+  result.overlapped <- repeats.overlapped[queryHits(m)]
 
   # calculate repeats counts related genes
   observed.counts <- CountElements(result.overlapped, rmsk)[[1]]
