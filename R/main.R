@@ -721,6 +721,7 @@ FindMotifs <-
       queries <- list$Query
       backgrounds <- list$Background
       Rnames <-  unique(queries$RepeatName)[1:10]
+      Rnames<-Rnames[!is.na(Rnames)]
 
       if (length(Rnames) > 0) {
         for (name in Rnames) {
@@ -740,6 +741,8 @@ FindMotifs <-
       queries <- list$Query
       backgrounds <- list$Background
       Rnames <-  unique(queries$repeat_name)[1:10]
+      Rnames<-Rnames[!is.na(Rnames)]
+
 
       if (length(Rnames) > 0) {
         for (name in Rnames) {
@@ -757,8 +760,6 @@ FindMotifs <-
       return(print("please give correct type paremeter!"))
     }
 
-
-
   }
 
 IdentifyDEGLinkedRepeats <-
@@ -766,6 +767,7 @@ IdentifyDEGLinkedRepeats <-
            peaks,
            rmsk,
            genes,
+           alternative = "greater",
            numberOfShuffle = 100,
            distance = 100000) {
     options(warn = -1)
@@ -963,7 +965,7 @@ write.csv(all.RepeatName,
 
 
 test <- function(x, p, n) {
-  binom.test(x, p, n)
+  binom.test(x, p, n, alternative = alternative)
 }
 
 b.rName <-
