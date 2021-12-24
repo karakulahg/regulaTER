@@ -86,7 +86,7 @@ genes <- regulaTER::getInterval(input,dataset)
 
 start <- Sys.time()
 print(start)
-result100 <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 100, distance = 100000)
+result100 <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 100, distance = 100000, alternative = "greater")
 end <- Sys.time()
 print(end)
 print(paste("sh time :", (end - start )))
@@ -94,10 +94,10 @@ print(paste("sh time :", (end - start )))
 
 ```
 
-6. Using the output of IdentifyDEGLinkedRepeats, as well as the repeat masker object used in the same function, identify which genomic motifs are enriched in promoter associated PARs. This function requires a local installation of HOMER, available on the [HOMER website](http://homer.ucsd.edu/homer/).
+6. Using the output of IdentifyDEGLinkedRepeats, as well as the peak, repeat masker, and genes object used in the same function, identify which genomic motifs are enriched in promoter associated PARs. This function requires a local installation of HOMER, available on the [HOMER website](http://homer.ucsd.edu/homer/).
 
 ```
-FindMotifs(df = test, repeatMaskerFile = rmsk, genome = "hg38", outDir = "../test/", homerPath = "~/Downloads/Tools/homer/")
+FindMotifs(df = test, repeatMaskerFile = rmsk, peak = input.file, distance = 100000, genes = genes, genome = "hg38", outDir = "../test/", homerPath = "~/Downloads/Tools/homer/", type = "linkedRepeats")
 
 ```
 
@@ -108,6 +108,8 @@ ChIPseeker regions are divided into seven categories. In order of priority, thes
 Under genome and assembly, select the organism and genome assembly of choice, also to be used with ChIPseeker to annotate the peak regions. For region, select "genome", and for output format, choose "BED - browser extensible data". Fill the output file field to download the resulting file to your system.
 
 On the next screen, you can further select the regions your file will have. For promoter and downstream regions, select "Upstream by" or "Downstream by", respectively, in both cases using 3000 bases as the region length. Intergenic regions need not be downloaded, as any region not falling under another category are included in intergenic shuffles.
+
+In the current version of regulaTER, the complement intervals of the regions must be provided for each object in the list. They use the same format as the obtained BED files, but cover all genomic regions not found in the category. The user can generate these files using another genome arithmetic tool, such as bedtools complement (-i <BED> -g <genome>), available on the [bedtools Suite](https://bedtools.readthedocs.io/en/latest/index.html)
 
 The user will also require the full lengths of the chromosomes included in the annotation. These are available for each genome found in UCSC Genome Browser under Downloads / Genome Data, with the name "[assembly].chrom.sizes", under the link named "Genome sequence files and select annotations (2bit, GTF, GC-content, etc)".
 
