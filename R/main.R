@@ -719,8 +719,10 @@ FindMotifs <-
     if (type == "enrichPeak") {
       list <- calculate_background_par(df, repeatMaskerFile, peak)
       queries <- list$Query
+      queries <- queries[, c(1:3, 9, 4:8)]
       backgrounds <- list$Background
-      Rnames <-  unique(queries$RepeatName)[1:10]
+      backgrounds <- backgrounds[, c(1:3, 9, 4:8)]
+      Rnames <-  unique(queries$repeat_name)[1:10]
       Rnames<-Rnames[!is.na(Rnames)]
 
       if (length(Rnames) > 0) {
@@ -728,7 +730,7 @@ FindMotifs <-
           dir <- paste0(outDir, "/margeOutput/asRepeatName/", name)
           print(dir)
           dir.create(dir, recursive = T)
-          find_motifs_genome(queries[which(queries$RepeatName == name), ],
+          find_motifs_genome(queries[which(queries$repeat_name == name), ],
                              dir,
                              genome,
                              overwrite = T,
@@ -739,7 +741,9 @@ FindMotifs <-
       list <-
         calculate_background_linkedRepeats(df, repeatMaskerFile, peak, genes, distance)
       queries <- list$Query
+      queries <- queries[, c(1:3, 9, 4:8)]
       backgrounds <- list$Background
+      backgrounds <- backgrounds[, c(1:3, 9, 4:8)]
       Rnames <-  unique(queries$repeat_name)[1:10]
       Rnames<-Rnames[!is.na(Rnames)]
 
@@ -749,7 +753,7 @@ FindMotifs <-
           dir <- paste0(outDir, "/margeOutput/asRepeatName/", name)
           print(dir)
           dir.create(dir, recursive = T)
-          find_motifs_genome(queries[which(queries$RepeatName == name), ],
+          find_motifs_genome(queries[which(queries$repeat_name == name), ],
                              dir,
                              genome,
                              overwrite = T,
@@ -833,7 +837,7 @@ IdentifyDEGLinkedRepeats <-
         # to get match
         temp.nonPAR <-
           gr.nonPAR[gr.nonPAR$repeat_name == repeatList$RepeatName[i]]
-        part.nonPAR <-
+         part.nonPAR <-
           temp.nonPAR[sample(length(temp.nonPAR), repeatList$observed[i]),]
         d <-
           distanceToNearest(x = part.nonPAR, subject = MakeGrangeObj(genes))
@@ -863,7 +867,7 @@ IdentifyDEGLinkedRepeats <-
     write.csv(df.nonPAR,
               paste0("df1.csv"),
               row.names = F,
-              quote = F)
+               quote = F)
     diff.rName <- setdiff(rmsk$repeat_name, df.nonPAR$target)
 
     library(dplyr)
