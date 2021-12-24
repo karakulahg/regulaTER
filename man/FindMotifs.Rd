@@ -11,18 +11,41 @@ Uses HOMER to identify enriched genomic motifs, such as transcription factor bin
 list of DEG promoter enriched PARs, and places the results into user provided directory.
 }
 \usage{
-FindMotifs(df, repeatMaskerFile, outDir, homerPath)
+FindMotifs(df, repeatMaskerFile, peak, genes, distance, genome, outDir, homerPath)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{df}{
 %%     ~~Describe \code{df} here~~
 data frame of binomial test results, multitest corrected using FDR adjustment, identifying enriched
-repeat subfamilies, obtained using EnrichPARs or IdentiftDEFLinkedRepeats functions.
+repeat subfamilies, obtained using EnrichPARs or IdentifyDEGLinkedRepeats functions.
 }
   \item{repeatMaskerFile}{
 %%     ~~Describe \code{repeatMaskerFile} here~~
 data frame containing repeat information, generated via \link{read_rm}.
+}
+  \item{peak}{
+%%     ~~Describe \code{peak} here~~
+data frame containing peak intervals and annotation.
+}
+  \item{genes}{
+%%     ~~Describe \code{genes} here~~
+data frame with six columns - geneID: character vector identifying Ensembl IDs of differentially expressed genes,
+or another suitable unique interval identifier; geneName: character vector identifying official gene symbols of
+differentially expressed genes; seqnames: character vector identifying chromosome names of gene intervals;
+start: integer vector identifying starting nucleotides of gene intervals; end: integer vector identifying
+end nucleotides of gene intervals; strand: character vector identifying strand information of genes. Should
+be the same object as used for IdentifyDEGLinkedRepeats if type is "linkedRepeats".
+}
+  \item{distance}{
+%%     ~~Describe \code{distance} here~~
+integer determining the distance in number of nucleotides, within which repeats are considered associated with DEGs.
+Shouldbe the same distance as used for IdentifyDEGLinkedRepeats if type is "linkedRepeats".
+}
+  \item{genome}{
+%%     ~~Describe \code{genome} here~~
+character vector identifying the genome build used for HOMER operations. Usually an organism common name or a genome build name.
+For details, see the HOMER configuration manual.
 }
   \item{outDir}{
 %%     ~~Describe \code{outDir} here~~
@@ -31,6 +54,11 @@ character vector identifying target output directory of motif enrichment analysi
   \item{homerPath}{
 %%     ~~Describe \code{homerPath} here~~
 character vector identifying full path to HOMER binary directory.
+}
+  \item{type}{
+%%     ~~Describe \code{type} here~~
+character vector identifying whether the df input argument is generated via EnrichPARs or IdentifyDEGLinkedRepeats. One of "enrichPeak"
+or "linkedRepeats", for the two functions, respectively. This argument has no default and must be supplied for the function to work.
 }
 }
 \details{
