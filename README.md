@@ -86,7 +86,7 @@ genes <- regulaTER::getInterval(input,dataset)
 
 start <- Sys.time()
 print(start)
-result100 <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 100, distance = 100000)
+result100 <- IdentifyDEGLinkedRepeats(enrichPARsResult = test, peaks = input.file, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 100, distance = 100000, alternative = "greater")
 end <- Sys.time()
 print(end)
 print(paste("sh time :", (end - start )))
@@ -94,10 +94,10 @@ print(paste("sh time :", (end - start )))
 
 ```
 
-6. Using the output of IdentifyDEGLinkedRepeats, as well as the repeat masker object used in the same function, identify which genomic motifs are enriched in promoter associated PARs. This function requires a local installation of HOMER, available on the [HOMER website](http://homer.ucsd.edu/homer/).
+6. Using the output of IdentifyDEGLinkedRepeats, as well as the peak, repeat masker, and genes object used in the same function, identify which genomic motifs are enriched in promoter associated PARs. This function requires a local installation of HOMER, available on the [HOMER website](http://homer.ucsd.edu/homer/).
 
 ```
-FindMotifs(df = test, repeatMaskerFile = rmsk, genome = "hg38", outDir = "../test/", homerPath = "~/Downloads/Tools/homer/")
+FindMotifs(df = test, repeatMaskerFile = rmsk, peak = input.file, distance = 100000, genes = genes, genome = "hg38", outDir = "../test/", homerPath = "~/Downloads/Tools/homer/", type = "linkedRepeats")
 
 ```
 
