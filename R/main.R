@@ -400,6 +400,8 @@ EnrichPARs <-
            numberOfShuffle = 1,
            repeatMaskerFile,
            format,
+           alternative = "greater",
+           minobserved = 0,
            minoverlap = 0L,
            outdir) {
     options(warn = -1)
@@ -531,8 +533,8 @@ EnrichPARs <-
       )
     all.RepeatName$obsOnTrueMean <-
       all.RepeatName$observed / all.RepeatName$TrueMean
-    all.RepeatName$p.value[all.RepeatName$observed < 11] <- NA
-    all.RepeatName$p.adjust.value[all.RepeatName$observed < 11] <- NA
+    all.RepeatName$p.value[all.RepeatName$observed <= minobserved] <- NA
+    all.RepeatName$p.adjust.value[all.RepeatName$observed <= minobserved] <- NA
 
     b.rFamily <-
       mapply(
@@ -550,8 +552,8 @@ EnrichPARs <-
       )
     all.RepeatFamily$obsOnTrueMean <-
       all.RepeatFamily$observed / all.RepeatFamily$TrueMean
-    all.RepeatFamily$p.value[all.RepeatFamily$observed < 11] <- NA
-    all.RepeatFamily$p.adjust.value[all.RepeatFamily$observed < 11] <-
+    all.RepeatFamily$p.value[all.RepeatFamily$observed <= minobserved] <- NA
+    all.RepeatFamily$p.adjust.value[all.RepeatFamily$observed <= minobserved] <-
       NA
 
     b.rType <-
@@ -570,8 +572,8 @@ EnrichPARs <-
       )
     all.RepeatType$obsOnTrueMean <-
       all.RepeatType$observed / all.RepeatType$TrueMean
-    all.RepeatType$p.value[all.RepeatType$observed < 11] <- NA
-    all.RepeatType$p.adjust.value[all.RepeatType$observed < 11] <- NA
+    all.RepeatType$p.value[all.RepeatType$observed <= minobserved] <- NA
+    all.RepeatType$p.adjust.value[all.RepeatType$observed <= minobserved] <- NA
 
     # to sort results as p-adjust values
     all.RepeatName <-
@@ -710,7 +712,8 @@ FindMotifs <-
            genome,
            outDir,
            homerPath,
-           type) {
+           type,
+           topTen = TRUE) {
     options(warn = -1)
     library(marge)
     options("homer_path" = homerPath)
@@ -722,7 +725,10 @@ FindMotifs <-
       queries <- queries[, c(1:3, 9, 4:8)]
       backgrounds <- list$Background
       backgrounds <- backgrounds[, c(1:3, 9, 4:8)]
-      Rnames <-  unique(queries$repeat_name)[1:10]
+      Rnames <-  unique(queries$repeat_name)
+      if(topTen){
+        Rnames <-  Rnames[1:10]
+      }
       Rnames<-Rnames[!is.na(Rnames)]
 
       if (length(Rnames) > 0) {
@@ -744,7 +750,10 @@ FindMotifs <-
       queries <- queries[, c(1:3, 9, 4:8)]
       backgrounds <- list$Background
       backgrounds <- backgrounds[, c(1:3, 9, 4:8)]
-      Rnames <-  unique(queries$repeat_name)[1:10]
+      Rnames <-  unique(queries$repeat_name)
+      if(topTen){
+        Rnames <-  Rnames[1:10]
+      }
       Rnames<-Rnames[!is.na(Rnames)]
 
 
@@ -772,6 +781,7 @@ IdentifyDEGLinkedRepeats <-
            rmsk,
            genes,
            alternative = "greater",
+           minobserved = 0,
            numberOfShuffle = 100,
            distance = 100000) {
     options(warn = -1)
@@ -987,6 +997,9 @@ all.RepeatName$p.adjust.value <-
 
 all.RepeatName <-
   all.RepeatName[order(all.RepeatName$p.adjust.value), ]
+
+all.RepeatName$p.value[all.RepeatName$observed <= minobserved] <- NA
+all.RepeatName$p.adjust.value[all.RepeatName$observed <= minobserved] <- NA
 
 return(all.RepeatName)
 }
