@@ -53,32 +53,7 @@ None. Generated output is placed in the directory identified by the outDir param
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (enrichPARsResult, stage, outDir)
-{
-    Rname <- enrichPARsResult$RepeatName
-    Rname <- Filtering(Rname, stage)
-    MakeFigure1(Rname, outDir, "RepeatName")
-    MakeFigure2(Rname, outDir, "RepeatName")
-    MakeFigure3(Rname, outDir, "RepeatName")
-    MakeFigure4(Rname, outDir, "RepeatName")
-    Rfamily <- enrichPARsResult$RepeatFamily
-    Rfamily <- Filtering(Rfamily, stage)
-    MakeFigure1(Rfamily, outDir, "RepeatFamily")
-    MakeFigure2(Rfamily, outDir, "RepeatFamily")
-    MakeFigure3(Rfamily, outDir, "RepeatFamily")
-    MakeFigure4(Rfamily, outDir, "RepeatFamily")
-    Rtype <- enrichPARsResult$RepeatType
-    Rtype <- Filtering(Rtype, stage)
-    MakeFigure1(Rtype, outDir, "RepeatType")
-    MakeFigure2(Rtype, outDir, "RepeatType")
-    MakeFigure3(Rtype, outDir, "RepeatType")
-    MakeFigure4(Rtype, outDir, "RepeatType")
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):

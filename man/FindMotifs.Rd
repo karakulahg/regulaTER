@@ -60,6 +60,11 @@ character vector identifying full path to HOMER binary directory.
 character vector identifying whether the df input argument is generated via EnrichPARs or IdentifyDEGLinkedRepeats. One of "enrichPeak"
 or "linkedRepeats", for the two functions, respectively. This argument has no default and must be supplied for the function to work.
 }
+  \item{topTen}{
+%%     ~~Describe \code{type} here~~
+boolean value identifying whether only the top ten repeats (TRUE) or all repeats identified in the list (FALSE) should be included in the
+motif discovery analysis.
+}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -69,6 +74,9 @@ use of the FindMotifs function. HOMER software can be obtained via the instructi
 
 Heinz S, Benner C, Spann N, Bertolino E et al. Simple Combinations of Lineage-Determining Transcription Factors Prime cis-Regulatory Elements Required for Macrophage and B Cell Identities. Mol Cell 2010 May 28;38(4):576-589. PMID: 20513432
 
+Users should note that the motif discovery for a single repeat subfamily can take a
+considerable amount of time, and if "topTen = FALSE", it is recommended that users only
+provide a subset of their input for the "df" argument to analyze selected repeats of interest.
 }
 \value{
 %%  ~Describe the value returned
@@ -95,34 +103,7 @@ of the HOMER software output, please see \href{http://homer.ucsd.edu/homer/}{HOM
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (df, repeatMaskerFile, outDir, homerPath)
-{
-    rmsk <- FormattingRM(repeatMaskerFile)
-    binom.test.results <- df
-    name <- rmsk[which(rmsk$repeat_name \%in\% as.vector(binom.test.results$RepeatName$RepeatName)),
-        ]
-    name$ID <- row.names(name)
-    df.name <- name[, c(1, 2, 3, 8, 5, 4)]
-    write.table(df.name, file = paste0(outDir, "/repeatName.bed"),
-        quote = F, sep = "\t", row.names = F, col.names = F)
-    library(marge)
-    options(homer_path = homerPath)
-    options(stringsAsFactors = F)
-    if (nrow(df.name) > 0) {
-        for (i in 1:10) {
-            dir <- paste0(outDir, "/margeOutput/asRepeatName/",
-                df.name[i, ]$repeat_name)
-            print(dir)
-            dir.create(dir, recursive = T)
-            find_motifs_genome(df.name[i, ], dir, "hg38", overwrite = T)
-        }
-    }
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory (show via RShowDoc("KEYWORDS")):
