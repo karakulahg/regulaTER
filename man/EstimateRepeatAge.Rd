@@ -54,38 +54,7 @@ A data frame with columns corresponding to repeat subfamily, estimated age, and 
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (repeatMasterFile, peakFile, substRate)
-{
-    rmsk <- FormattingRM(repeatMasterFile, goal = "calcAge")
-    gr.rmsk <- MakeGrangeObj(rmsk)
-    gr.peak <- MakeGrangeObj(peakFile)
-    overlapped <- GetOverlap(rmsk = rmsk, gr.input = gr.peak,
-        format = "narrow", goal = "calcAge")
-    df.PAR <- as.data.frame(overlapped)
-    gr.nonPAR <- gr.rmsk[!gr.rmsk \%over\% overlapped, ]
-    df.nonPAR <- as.data.frame(gr.nonPAR)
-    x1 <- data.frame()
-    if (nrow(df.PAR) != 0) {
-        x1 <- df.PAR[, c("RepeatName", "perc_div")] \%>\% group_by(RepeatName) \%>\%
-            summarise(Age = (mean(perc_div)))
-    }
-    x1$Type <- "PAR"
-    x2 <- data.frame()
-    if (nrow(df.nonPAR) != 0) {
-        x2 <- df.nonPAR[, c("repeat_name", "perc_div")] \%>\% group_by(repeat_name) \%>\%
-            summarise(Age = (mean(perc_div)))
-    }
-    x2$Type <- "nonPAR"
-    colnames(x2)[1] <- "RepeatName"
-    x <- rbind(x1, x2)
-    x$Age <- (x$Age * 10)/substRate
-    return(x)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

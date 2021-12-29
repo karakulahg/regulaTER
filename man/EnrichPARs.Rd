@@ -34,6 +34,10 @@ data frame containing repeat information, generated via \link{read_rm}.
 %%     ~~Describe \code{format} here~~
 character vector identifying peak file format, one of "narrow", "broad", or "summit".
 }
+  \item{minobserved}{
+%%     ~~Describe \code{minoverlap} here~~
+integer identifying minimum number of observed peak - repeat associations to be included in the output.
+}
   \item{minoverlap}{
 %%     ~~Describe \code{minoverlap} here~~
 integer identifying minimum number of overlapping bases between "broad" peak and repeat intervals.
@@ -69,89 +73,7 @@ A list with three components:
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (inputPeakFile, pathList, numberOfShuffle = 1, repeatMaskerFile,
-    format, minoverlap = 0L)
-{
-    gr.input <- MakeGrangeObj(inputPeakFile = inputPeakFile)
-    observe.counts <- CountIntersect(repeatMaskerFile, gr.input,
-        format, minoverlap)
-    gr <- ShufflePeaks(inputPeakFile, pathList)
-    expected.counts <- CountIntersect(repeatMaskerFile, gr, format,
-        minoverlap)
-    if (numberOfShuffle > 1) {
-        Rname <- as.data.frame(expected.counts[[1]])
-        Rfamily <- as.data.frame(expected.counts[[2]])
-        Rtype <- as.data.frame(expected.counts[[3]])
-        for (i in 1:numberOfShuffle) {
-            tmp <- ShufflePeaks(inputPeakFile, pathList)
-            tmp.counts <- CountIntersect(repeatMaskerFile, tmp,
-                format, minoverlap)
-            tmp.Rname <- as.data.frame(tmp.counts[[1]])
-            colnames(tmp.Rname) <- c("RepeatName", i)
-            tmp.Rfamily <- as.data.frame(tmp.counts[[2]])
-            colnames(tmp.Rfamily) <- c("RepeatFamily", i)
-            tmp.Rtype <- as.data.frame(tmp.counts[[3]])
-            colnames(tmp.Rtype) <- c("RepeatType", i)
-            Rname <- merge(Rname, tmp.Rname, by = "RepeatName")
-            Rfamily <- merge(Rfamily, tmp.Rfamily, by = "RepeatFamily")
-            Rtype <- merge(Rtype, tmp.Rtype, by = "RepeatType")
-        }
-        Rname$Mean <- round(rowMeans(Rname[, c(2:ncol(Rname))]))
-        Rfamily$Mean <- round(rowMeans(Rfamily[, c(2:ncol(Rfamily))]))
-        Rtype$Mean <- round(rowMeans(Rtype[, c(2:ncol(Rtype))]))
-        expected.counts <- list(Rname, Rfamily, Rtype)
-    }
-    rmsk <- FormattingRM(rmsk)
-    rmsk.counts <- CountRM(rmsk)
-    all.RepeatName <- merge(as.data.frame(rmsk.counts[[1]]),
-        as.data.frame(observe.counts[[1]]), by = "RepeatName")
-    all.RepeatName <- merge(all.RepeatName, as.data.frame(expected.counts[[1]][,
-        c(1, ncol(expected.counts[[1]]))]), by = "RepeatName")
-    colnames(all.RepeatName) <- c("RepeatName", "rmsk", "observe",
-        "expected")
-    all.RepeatFamily <- merge(as.data.frame(rmsk.counts[[2]]),
-        as.data.frame(observe.counts[[2]]), by = "RepeatFamily")
-    all.RepeatFamily <- merge(all.RepeatFamily, as.data.frame(expected.counts[[2]][,
-        c(1, ncol(expected.counts[[1]]))]), by = "RepeatFamily")
-    colnames(all.RepeatFamily) <- c("RepeatFamily", "rmsk", "observe",
-        "expected")
-    all.RepeatType <- merge(as.data.frame(rmsk.counts[[3]]),
-        as.data.frame(observe.counts[[3]]), by = "RepeatType")
-    all.RepeatType <- merge(all.RepeatType, as.data.frame(expected.counts[[3]][,
-        c(1, ncol(expected.counts[[1]]))]), by = "RepeatType")
-    colnames(all.RepeatType) <- c("RepeatType", "rmsk", "observe",
-        "expected")
-    test <- function(x, p, n) {
-        binom.test(x, p, n)
-    }
-    b.rName <- mapply(test, all.RepeatName$observe, all.RepeatName$rmsk,
-        (all.RepeatName$expected/all.RepeatName$rmsk))
-    all.RepeatName$p.value <- do.call(rbind, b.rName["p.value",
-        ])
-    all.RepeatName$p.adjust.value <- p.adjust(all.RepeatName$p.value,
-        method = "fdr", n = length(all.RepeatName$p.value))
-    b.rFamily <- mapply(test, all.RepeatFamily$observe, all.RepeatFamily$rmsk,
-        (all.RepeatFamily$expected/all.RepeatFamily$rmsk))
-    all.RepeatFamily$p.value <- do.call(rbind, b.rFamily["p.value",
-        ])
-    all.RepeatFamily$p.adjust.value <- p.adjust(all.RepeatFamily$p.value,
-        method = "fdr", n = length(all.RepeatFamily$p.value))
-    b.rType <- mapply(test, all.RepeatType$observe, all.RepeatType$rmsk,
-        (all.RepeatType$expected/all.RepeatType$rmsk))
-    all.RepeatType$p.value <- do.call(rbind, b.rType["p.value",
-        ])
-    all.RepeatType$p.adjust.value <- p.adjust(all.RepeatType$p.value,
-        method = "fdr", n = length(all.RepeatType$p.value))
-    binom.test.results <- list(RepeatName = subset(all.RepeatName,
-        p.value < 0.001 & observe > expected), RepeatFamily = subset(all.RepeatFamily,
-        p.value < 0.001 & observe > expected), RepeatType = subset(all.RepeatType,
-        p.value < 0.001 & observe > expected))
-    return(binom.test.results)
   }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the

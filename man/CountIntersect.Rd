@@ -62,58 +62,7 @@ A list with three components.
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
 
-## The function is currently defined as
-function (repeatMaskerFile, inputPeakFile, format, minoverlap = 0L)
-{
-    gr.input <- inputPeakFile
-    rmsk <- FormattingRM(repeatMaskerFile)
-    library(GenomicRanges)
-    gr.rmsk <- with(rmsk, GenomicRanges::GRanges(chr, IRanges(start,
-        end), strand = strand))
-    values(gr.rmsk) <- DataFrame(RepeatName = rmsk$repeat_name,
-        RepeatFamily = rmsk$repeat_family, RepeatType = rmsk$repeat_type)
-    if (format == "narrow") {
-        if (ncol(elementMetadata(gr.input)) != 0) {
-            GenomicRanges::start(gr.input) <- GenomicRanges::start(gr.input) +
-                gr.input$peak
-            GenomicRanges::end(gr.input) <- GenomicRanges::start(gr.input) +
-                1
-        }
-    }
-    if (format == "braod") {
-        m <- GenomicRanges::findOverlaps(gr.rmsk, gr.input, ignore.strand = TRUE,
-            minoverlap = minoverlap)
-    }
-    else {
-        m <- GenomicRanges::findOverlaps(gr.rmsk, gr.input, ignore.strand = TRUE)
-    }
-    gr.rmsk.matched <- gr.rmsk[queryHits(m)]
-    mcols(gr.rmsk.matched) <- cbind.data.frame(mcols(gr.rmsk.matched),
-        mcols(gr.input[subjectHits(m)]))
-    df.rmsk.matched <- as.data.frame(gr.rmsk.matched)
-    diff.rName <- setdiff(rmsk$repeat_name, df.rmsk.matched$RepeatName)
-    diff.rFamily <- setdiff(rmsk$repeat_family, df.rmsk.matched$RepeatFamily)
-    diff.rType <- setdiff(rmsk$repeat_type, df.rmsk.matched$RepeatType)
-    library(dplyr)
-    x <- df.rmsk.matched \%>\% count(RepeatName)
-    colnames(x) <- c("RepeatName", "nRepeatName")
-    x <- rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0,
-        length(diff.rName))))
-    x1 <- df.rmsk.matched \%>\% count(RepeatFamily)
-    colnames(x1) <- c("RepeatFamily", "nRepeatFamily")
-    x1 <- rbind(x1, data.frame(RepeatFamily = diff.rFamily, nRepeatFamily = rep.int(0,
-        length(diff.rFamily))))
-    x2 <- df.rmsk.matched \%>\% count(RepeatType)
-    colnames(x2) <- c("RepeatType", "nRepeatType")
-    x2 <- rbind(x2, data.frame(RepeatType = diff.rType, nRepeatType = rep.int(0,
-        length(diff.rType))))
-    all.counts <- list(x, x1, x2)
-    return(all.counts)
-  }
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
