@@ -34,6 +34,10 @@ data frame containing repeat information, generated via \link{read_rm}.
 %%     ~~Describe \code{format} here~~
 character vector identifying peak file format, one of "narrow", "broad", or "summit".
 }
+  \item{minobserved}{
+%%     ~~Describe \code{minoverlap} here~~
+integer identifying minimum number of observed peak - repeat associations to be included in the output.
+}
   \item{minoverlap}{
 %%     ~~Describe \code{minoverlap} here~~
 integer identifying minimum number of overlapping bases between "broad" peak and repeat intervals.

@@ -60,6 +60,11 @@ character vector identifying full path to HOMER binary directory.
 character vector identifying whether the df input argument is generated via EnrichPARs or IdentifyDEGLinkedRepeats. One of "enrichPeak"
 or "linkedRepeats", for the two functions, respectively. This argument has no default and must be supplied for the function to work.
 }
+  \item{topTen}{
+%%     ~~Describe \code{type} here~~
+boolean value identifying whether only the top ten repeats (TRUE) or all repeats identified in the list (FALSE) should be included in the
+motif discovery analysis.
+}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -69,6 +74,9 @@ use of the FindMotifs function. HOMER software can be obtained via the instructi
 
 Heinz S, Benner C, Spann N, Bertolino E et al. Simple Combinations of Lineage-Determining Transcription Factors Prime cis-Regulatory Elements Required for Macrophage and B Cell Identities. Mol Cell 2010 May 28;38(4):576-589. PMID: 20513432
 
+Users should note that the motif discovery for a single repeat subfamily can take a
+considerable amount of time, and if "topTen = FALSE", it is recommended that users only
+provide a subset of their input for the "df" argument to analyze selected repeats of interest.
 }
 \value{
 %%  ~Describe the value returned
