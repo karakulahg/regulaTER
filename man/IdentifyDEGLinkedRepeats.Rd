@@ -33,6 +33,10 @@ data frame with six columns - geneID: character vector identifying Ensembl IDs o
   \item{alternative}
 %%     ~~Describe \code{alternative} here~~
 character vector identifying what the null hypothesis of the binomial test is. One of "greater", "less", or "two-sided", or the initial letter of such.
+  \item{minobserved}{
+%%     ~~Describe \code{minoverlap} here~~
+integer identifying minimum number of observed peak - repeat associations to be included in the output.
+}
   \item{numberOfShuffle}{
 %%     ~~Describe \code{numberOfShuffle} here~~
 integer determining the number of shuffle operations to be performed for calculation of repeat - gene association enrichment.
