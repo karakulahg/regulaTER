@@ -394,7 +394,7 @@ ShufflePeaks <- function(peakFile, pathList, seed = 0) {
 
 }
 
-EnrichPARs <-
+TEAR <-
   function(inputPeakFile,
            pathList,
            numberOfShuffle = 1,
@@ -713,7 +713,7 @@ FindMotifs <-
            outDir,
            homerPath,
            type,
-           topTen = TRUE) {
+           numberOfMotifs = TRUE) {
     options(warn = -1)
     library(marge)
     options("homer_path" = homerPath)
@@ -726,7 +726,7 @@ FindMotifs <-
       backgrounds <- list$Background
       backgrounds <- backgrounds[, c(1:3, 9, 4:8)]
       Rnames <-  unique(queries$repeat_name)
-      if(topTen){
+      if(numberOfMotifs){
         Rnames <-  Rnames[1:10]
       }
       Rnames<-Rnames[!is.na(Rnames)]
@@ -751,7 +751,7 @@ FindMotifs <-
       backgrounds <- list$Background
       backgrounds <- backgrounds[, c(1:3, 9, 4:8)]
       Rnames <-  unique(queries$repeat_name)
-      if(topTen){
+      if(numberOfMotifs){
         Rnames <-  Rnames[1:10]
       }
       Rnames<-Rnames[!is.na(Rnames)]
@@ -775,8 +775,8 @@ FindMotifs <-
 
   }
 
-IdentifyDEGLinkedRepeats <-
-  function(enrichPARsResult,
+DATE <-
+  function(enrichTEARResult,
            peaks,
            rmsk,
            genes,
@@ -785,7 +785,7 @@ IdentifyDEGLinkedRepeats <-
            numberOfShuffle = 100,
            distance = 100000) {
     options(warn = -1)
-    count <- enrichPARsResult
+    count <- enrichTEARResult
     write.csv(count[[1]],
               paste0("count.csv"),
               row.names = F,
@@ -1104,11 +1104,11 @@ getInterval <- function(input, dataset) {
   return(data)
 }
 
-MakePlots <- function(enrichPARsResult, outDir) {
+MakePlots <- function(enrichTEARResult, outDir, width=4, height=4) {
   options(warn = -1)
-  MakePlotsRepeatName(enrichPARsResult$RepeatName, outDir)
-  MakePlotsRepeatType(enrichPARsResult$RepeatType, outDir)
-  MakePlotsRepeatFamily(enrichPARsResult$RepeatFamily, outDir)
+  MakePlotsRepeatName(enrichTEARResult$RepeatName, outDir, width, height)
+  MakePlotsRepeatType(enrichTEARResult$RepeatType, outDir, width, height)
+  MakePlotsRepeatFamily(enrichTEARResult$RepeatFamily, outDir, width, height)
 
 
 }
