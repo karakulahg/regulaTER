@@ -109,7 +109,7 @@ Under genome and assembly, select the organism and genome assembly of choice, al
 
 On the next screen, you can further select the regions your file will have. For promoter and downstream regions, select "Upstream by" or "Downstream by", respectively, in both cases using 3000 bases as the region length. Intergenic regions need not be downloaded, as any region not falling under another category are included in intergenic shuffles.
 
-In the current version of regulaTER, the complement intervals of the regions must be provided for each object in the list. They use the same format as the obtained BED files, but cover all genomic regions not found in the category. The user can generate these files using another genome arithmetic tool, such as bedtools complement (-i <BED> -g <genome>), available on the [bedtools Suite](https://bedtools.readthedocs.io/en/latest/index.html)
+In the current version of regulaTER, the complement intervals of the regions must be provided for each object in the list. They use the same format as the obtained BED files, but cover all genomic regions not found in the category. The user can generate these files using another genome arithmetic tool, such as bedtools complement (-i <BED> -g <genome>), available on the [bedtools Suite](https://bedtools.readthedocs.io/en/latest/index.html).
 
 The user will also require the full lengths of the chromosomes included in the annotation. These are available for each genome found in UCSC Genome Browser under Downloads / Genome Data, with the name "[assembly].chrom.sizes", under the link named "Genome sequence files and select annotations (2bit, GTF, GC-content, etc)".
 
