@@ -30,9 +30,10 @@ data frame containing repeat information, generated via \link{read_rm}.
 %%     ~~Describe \code{genes} here~~
 data frame with six columns - geneID: character vector identifying Ensembl IDs of differentially expressed genes, or another suitable unique interval identifier; geneName: character vector identifying official gene symbols of differentially expressed genes; seqnames: character vector identifying chromosome names of gene intervals; start: integer vector identifying starting nucleotides of gene intervals; end: integer vector identifying end nucleotides of gene intervals; strand: character vector identifying strand information of genes.
 }
-  \item{alternative}
+  \item{alternative}{
 %%     ~~Describe \code{alternative} here~~
 character vector identifying what the null hypothesis of the binomial test is. One of "greater", "less", or "two-sided", or the initial letter of such.
+}
   \item{minobserved}{
 %%     ~~Describe \code{minoverlap} here~~
 integer identifying minimum number of observed peak - repeat associations to be included in the output.
@@ -75,7 +76,6 @@ A data frame of binomial test results, multitest corrected using FDR adjustment,
 \examples{
 
   }
-}
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
 \keyword{ ~kwd1 }% use one of  RShowDoc("KEYWORDS")
