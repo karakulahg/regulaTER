@@ -1,5 +1,5 @@
-\name{EnrichPARs}
-\alias{EnrichPARs}
+\name{TEAR}
+\alias{TEAR}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 %%  ~~function to do ... ~~
@@ -10,7 +10,7 @@ Calculate Enrichment of Repeats Associated with Genomic Peak Regions
 Calculates the p-values of peak and repeat associations using negative binomial distribution and multi testing correction, based on genome shuffling of peak regions.
 }
 \usage{
-EnrichPARs(inputPeakFile, pathList, numberOfShuffle = 1, repeatMaskerFile, format, minoverlap = 0L)
+TEAR(inputPeakFile, pathList, numberOfShuffle = 1, repeatMaskerFile, format, alternative = "greater", minobserved = 10, minoverlap = 0L)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

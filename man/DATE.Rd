@@ -1,5 +1,5 @@
-\name{IdentifyDEGLinkedRepeats}
-\alias{IdentifyDEGLinkedRepeats}
+\name{DATE}
+\alias{DATE}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 %%  ~~function to do ... ~~
@@ -7,16 +7,16 @@ Identify Enrichment of Repeat Elements in Proximity of Differentially Expressed 
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Calculates the p-values of peak associated repeat (PAR) and differentially expressed gene (DEG) associations using negative binomial distribution and multi testing correction, compared to random sampling of non-peak associated repeats in proximity of DEGs.
+Calculates the p-values of repeat regions associated with peaks and differentially expressed gene (DEG) associations using negative binomial distribution and multi testing correction, compared to random sampling of non-peak associated repeats in proximity of DEGs.
 }
 \usage{
-IdentifyDEGLinkedRepeats(enrichPARsResult, peaks, rmsk, genes, numberOfShuffle = 100, distance = 1e+05)
+DATE(enrichTEARResult, peaks, rmsk, genes, alternative = "greater", minobserved = 10, numberOfShuffle = 100, distance = 1e+05)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{enrichPARsResult}{
+  \item{enrichTEARResult}{
 %%     ~~Describe \code{enrichPARsResult} here~~
-a list of length 3, returned by the EnrichPARs function.
+a list of length 3, returned by the TEAR function.
 }
   \item{peaks}{
 %%     ~~Describe \code{peaks} here~~

@@ -3,27 +3,35 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 %%  ~~function to do ... ~~
-Create Exploratory Scatter and Bar Plots for Enriched PAR Regions
+Create Exploratory Scatter and Bar Plots for Repeat Regions Enriched in Accessible Genomic Peaks
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
-Creates automated plots of significantly enriched PAR regions identified by
-the enrichPARs function, using ggplot2 functions.
+Creates automated plots of significantly repeat regions enriched in accessible
+genomic peaks identified by the TEAR function, using ggplot2 functions.
 }
 \usage{
-MakePlots(enrichPARsResult, outDir)
+MakePlots(enrichTEARResult, outDir, width = 4, height = 4)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{enrichPARsResult}{
+  \item{enrichTEARResult}{
 %%     ~~Describe \code{enrichPARsResult} here~~
 a list of length 3, with the names "RepeatName", "RepeatType", and "RepeatFamily",
-and data frames generated via \link{binom.test}, as a result of the \link{enrichPARs}
+and data frames generated via \link{binom.test}, as a result of the \link{TEAR}
 function.
 }
   \item{outDir}{
 %%     ~~Describe \code{outDir} here~~
-character vector identifying target output directory of generated plots..
+character vector identifying target output directory of generated plots.
+}
+  \item{width}{
+%%     ~~Describe \code{width} here~~
+numeric identifying the width (x-axis length) of the resulting image files.
+}
+  \item{height}{
+%%     ~~Describe \code{height} here~~
+numeric identifying the height (y-axis length) of the resulting image files.
 }
 }
 \details{

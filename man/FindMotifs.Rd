@@ -8,10 +8,10 @@ Find Enriched Genomic Motifs in Repeats Enriched in Promoters using HOMER
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 Uses HOMER to identify enriched genomic motifs, such as transcription factor binding sites, in provided
-list of DEG promoter enriched PARs, and places the results into user provided directory.
+list of repeats enriched in accessible DEG promoters, and places the results into user provided directory.
 }
 \usage{
-FindMotifs(df, repeatMaskerFile, peak, genes, distance, genome, outDir, homerPath)
+FindMotifs(df, repeatMaskerFile, peak, genes, distance, genome, outDir, homerPath, type, numberOfMotifs)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -60,7 +60,7 @@ character vector identifying full path to HOMER binary directory.
 character vector identifying whether the df input argument is generated via EnrichPARs or IdentifyDEGLinkedRepeats. One of "enrichPeak"
 or "linkedRepeats", for the two functions, respectively. This argument has no default and must be supplied for the function to work.
 }
-  \item{topTen}{
+  \item{numberOfMotifs}{
 %%     ~~Describe \code{type} here~~
 boolean value identifying whether only the top ten repeats (TRUE) or all repeats identified in the list (FALSE) should be included in the
 motif discovery analysis.
@@ -75,7 +75,7 @@ use of the FindMotifs function. HOMER software can be obtained via the instructi
 Heinz S, Benner C, Spann N, Bertolino E et al. Simple Combinations of Lineage-Determining Transcription Factors Prime cis-Regulatory Elements Required for Macrophage and B Cell Identities. Mol Cell 2010 May 28;38(4):576-589. PMID: 20513432
 
 Users should note that the motif discovery for a single repeat subfamily can take a
-considerable amount of time, and if "topTen = FALSE", it is recommended that users only
+considerable amount of time, and if "numberOfMotifs = FALSE", it is recommended that users only
 provide a subset of their input for the "df" argument to analyze selected repeats of interest.
 }
 \value{
