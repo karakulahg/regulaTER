@@ -713,7 +713,7 @@ FindMotifs <-
            outDir,
            homerPath,
            type,
-           numberOfMotifs = TRUE) {
+           topRepeats = TRUE) {
     options(warn = -1)
     library(marge)
     options("homer_path" = homerPath)
@@ -726,7 +726,7 @@ FindMotifs <-
       backgrounds <- list$Background
       backgrounds <- backgrounds[, c(1:3, 9, 4:8)]
       Rnames <-  unique(queries$repeat_name)
-      if(numberOfMotifs){
+      if(topRepeats){
         Rnames <-  Rnames[1:10]
       }
       Rnames<-Rnames[!is.na(Rnames)]
@@ -751,7 +751,7 @@ FindMotifs <-
       backgrounds <- list$Background
       backgrounds <- backgrounds[, c(1:3, 9, 4:8)]
       Rnames <-  unique(queries$repeat_name)
-      if(numberOfMotifs){
+      if(topRepeats){
         Rnames <-  Rnames[1:10]
       }
       Rnames<-Rnames[!is.na(Rnames)]
