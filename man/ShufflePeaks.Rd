@@ -34,7 +34,7 @@ ChIPseeker annotations are divided into seven major classes. Promoter regions ar
 
 In the current version of regulaTER, the complement intervals of the regions must be provided for each object in the list. They use the same format as the obtained BED files, but cover all genomic regions not found in the category. The user can generate these files using another genome arithmetic tool, such as bedtools complement (-i <BED> -g <genome>), available on the [bedtools Suite](https://bedtools.readthedocs.io/en/latest/index.html).
 
-For the UCSC human and mouse genome assemblies hg38, hg19, and mm10, the files are available through the package installation, under "inst/extdata" in the package installation directory.
+For the UCSC human and mouse genome assemblies hg38, hg19, and mm10, the pre-generated genomic region files are available for download at LINK.
 
 genomeSizePath points to a file with two columns, corresponding to chromosome name and size, delimited by tabs.
 }
