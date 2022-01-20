@@ -60,7 +60,7 @@ character vector identifying full path to HOMER binary directory.
 character vector identifying whether the df input argument is generated via EnrichPARs or IdentifyDEGLinkedRepeats. One of "enrichPeak"
 or "linkedRepeats", for the two functions, respectively. This argument has no default and must be supplied for the function to work.
 }
-  \item{numberOfMotifs}{
+  \item{topRepeats}{
 %%     ~~Describe \code{type} here~~
 boolean value identifying whether only the top ten repeats (TRUE) or all repeats identified in the list (FALSE) should be included in the
 motif discovery analysis.
