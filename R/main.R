@@ -126,14 +126,18 @@ GetOverlap <-
     #### finds repeat ranges with overlapping summits ####
 
     if (format == "braod") {
+
       m <-
         GenomicRanges::findOverlaps(gr.rmsk,
                                     gr.input,
                                     ignore.strand = TRUE,
                                     minoverlap = minoverlap)
+
     } else{
+
       m <-
         GenomicRanges::findOverlaps(gr.rmsk, gr.input, ignore.strand = TRUE)
+
     }
     gr.rmsk.matched <- gr.rmsk[queryHits(m)]
 
@@ -141,13 +145,16 @@ GetOverlap <-
 
     mcols(gr.rmsk.matched) <- cbind.data.frame(mcols(gr.rmsk.matched),
                                                mcols(gr.input[subjectHits(m)]))
+
+
     return(gr.rmsk.matched)
+
   }
 
 CountElements <- function(gr.rmsk.matched, rmsk) {
   options(warn = -1)
   #### converts matched GRanges object into data frame and counts instances of given column name ####
-
+  suppressPackageStartupMessages({
   df.rmsk.matched <- as.data.frame(gr.rmsk.matched)
   diff.rName <-
     setdiff(rmsk$repeat_name, df.rmsk.matched$RepeatName)
@@ -178,7 +185,7 @@ CountElements <- function(gr.rmsk.matched, rmsk) {
           data.frame(RepeatType = diff.rType, nRepeatType = rep.int(0, length(diff.rType))))
 
   all.counts <- list(x, x1, x2)
-
+})
   ####
   return(all.counts)
 }
@@ -402,8 +409,7 @@ TEAR <-
            format,
            alternative = "greater",
            minobserved = 0,
-           minoverlap = 0L,
-           outdir) {
+           minoverlap = 0L) {
     options(warn = -1)
     # getting input Peak File as grange objects
     gr.input <- inputPeakFile
@@ -443,7 +449,7 @@ TEAR <-
         tmp.counts <-
           CountIntersect(repeatMaskerFile, tmp, format, minoverlap)
         end <- Sys.time()
-        print(paste("Countintersect time :", (end - start)))
+        #print(paste("Countintersect time :", (end - start)))
 
         # to separate data frames in new counted list
         tmp.Rname <- as.data.frame(tmp.counts[[1]])
@@ -511,8 +517,8 @@ TEAR <-
 
     # calculate binomial test function
     test <-
-      function(x, p, n) {
-        binom.test(x, p, n, alternative = "greater", conf.level = 0.95)
+      function(x, n, p) {
+        binom.test(x, n, p, alternative = alternative, conf.level = 0.95)
       }
 
     # apply binomial test for each results
@@ -584,39 +590,39 @@ TEAR <-
       all.RepeatType[order(all.RepeatType$p.adjust.value), ]
 
     # write each type results as separately to output directory
-    write.csv(
-      all.RepeatName,
-      paste0(
-        outdir,
-        "_",
-        numberOfShuffle,
-        "Final_Shuffle_beforeSubset_ALLRepeatName.csv"
-      ),
-      row.names = F,
-      quote = F
-    )
-    write.csv(
-      all.RepeatFamily,
-      paste0(
-        outdir,
-        "_",
-        numberOfShuffle,
-        "Final_Shuffle_beforeSubset_ALLRepeatFamily.csv"
-      ),
-      row.names = F,
-      quote = F
-    )
-    write.csv(
-      all.RepeatType,
-      paste0(
-        outdir,
-        "_",
-        numberOfShuffle,
-        "Final_Shuffle_beforeSubset_ALLRepeatType.csv"
-      ),
-      row.names = F,
-      quote = F
-    )
+    # write.csv(
+    #   all.RepeatName,
+    #   paste0(
+    #     outdir,
+    #     "_",
+    #     numberOfShuffle,
+    #     "Final_Shuffle_beforeSubset_ALLRepeatName.csv"
+    #   ),
+    #   row.names = F,
+    #   quote = F
+    # )
+    # write.csv(
+    #   all.RepeatFamily,
+    #   paste0(
+    #     outdir,
+    #     "_",
+    #     numberOfShuffle,
+    #     "Final_Shuffle_beforeSubset_ALLRepeatFamily.csv"
+    #   ),
+    #   row.names = F,
+    #   quote = F
+    # )
+    # write.csv(
+    #   all.RepeatType,
+    #   paste0(
+    #     outdir,
+    #     "_",
+    #     numberOfShuffle,
+    #     "Final_Shuffle_beforeSubset_ALLRepeatType.csv"
+    #   ),
+    #   row.names = F,
+    #   quote = F
+    # )
 
     # to collect results to a list and returned
     list <-
@@ -784,22 +790,14 @@ DATE <-
            minobserved = 0,
            numberOfShuffle = 100,
            distance = 100000) {
-    options(warn = -1)
+    options(warn = -1, echo = FALSE)
     count <- enrichTEARResult
-    write.csv(count[[1]],
-              paste0("count.csv"),
-              row.names = F,
-              quote = F)
+
     # getting enriched counts equals and more than 2 for observed repeat counts
     repeatList <-
       count[[1]][which(count[[1]]["observed"] >= 2), c("RepeatName", "observed")]
     gr.input <- peaks
-    write.csv(
-      as.data.frame(gr.input),
-      paste0("gr.input.csv"),
-      row.names = F,
-      quote = F
-    )
+
     # regulate repeat masker file
     rmsk <- FormattingRM(rmsk)
     # overlapped repeats and peaks
@@ -810,19 +808,11 @@ DATE <-
     # get overlapped has repeat names matched in enrich results
     repeats.overlapped <-
       subset(overlapped, RepeatName %in% repeatList$RepeatName)
-    write.csv(
-      repeats.overlapped,
-      paste0("repeats.overlapped.csv"),
-      row.names = F,
-      quote = F
-    )
+
     # find overlapped results nearest to given genes
     d <-
       distanceToNearest(x = repeats.overlapped, subject = MakeGrangeObj(genes))
-    write.csv(as.data.frame(d),
-              paste0("d.csv"),
-              row.names = F,
-              quote = F)
+
     m <- d[which(elementMetadata(d)$distance < distance),]
     result.overlapped <- repeats.overlapped[queryHits(m)]
 
@@ -835,12 +825,7 @@ DATE <-
     gr.nonPAR <- gr.rmsk[gr.rmsk %outside% overlapped, ]
     last.nonPAR <- data.frame()
     isfirsttime <- "true"
-    write.csv(
-      as.data.frame(gr.nonPAR),
-      paste0("gr.nonPAR.csv"),
-      row.names = F,
-      quote = F
-    )
+
 
     if (nrow(repeatList) != 0) {
       for (i in 1:nrow(repeatList)) {
@@ -874,10 +859,7 @@ DATE <-
     #### converts matched GRanges object into data frame and counts instances of given column name ####
 
     df.nonPAR <- as.data.frame(last.nonPAR)
-    write.csv(df.nonPAR,
-              paste0("df1.csv"),
-              row.names = F,
-               quote = F)
+
     diff.rName <- setdiff(rmsk$repeat_name, df.nonPAR$target)
 
     library(dplyr)
@@ -888,11 +870,8 @@ DATE <-
     }
 
     expected.counts <-
-      rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName)))) #????
-    write.csv(expected.counts,
-              paste0("ec1.csv"),
-              row.names = F,
-              quote = F)
+      rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
+
 
     if (numberOfShuffle > 1) {
       for (i in 1:(numberOfShuffle)) {
@@ -925,10 +904,7 @@ DATE <-
       #### converts matched GRanges object into data frame and counts instances of given column name ####
 
       df.nonPAR <- as.data.frame(last.nonPAR)
-      write.csv(df.nonPAR,
-                paste0("df2.csv"),
-                row.names = F,
-                quote = F)
+
 
       diff.rName <- setdiff(rmsk$repeat_name, df.nonPAR$target)
       x <- data.frame()
@@ -948,10 +924,7 @@ DATE <-
     }
     expected.counts$Mean <-
       round(rowMeans(expected.counts[, c(2:ncol(expected.counts))]))
-    write.csv(expected.counts,
-              paste0("ec2.csv"),
-              row.names = F,
-              quote = F)
+
 
   } else{
     names(expected.counts)[2] <- "Mean"
@@ -963,23 +936,17 @@ all.RepeatName <-
   merge(as.data.frame(rmsk.counts[[1]]),
         as.data.frame(observed.counts),
         by = "RepeatName")
-write.csv(all.RepeatName,
-          paste0("ar1.csv"),
-          row.names = F,
-          quote = F)
+
 
 all.RepeatName <-
   merge(all.RepeatName, expected.counts[, c("RepeatName", "Mean")], by = "RepeatName")
 colnames(all.RepeatName) <-
   c("RepeatName", "rmsk", "observed", "expected")
-write.csv(all.RepeatName,
-          paste0("ar2.csv"),
-          row.names = F,
-          quote = F)
 
 
-test <- function(x, p, n) {
-  binom.test(x, p, n, alternative = alternative)
+
+test <- function(x, n, p) {
+  binom.test(x, n, p, alternative = alternative)
 }
 
 b.rName <-
@@ -1054,7 +1021,6 @@ EstimateRepeatAge <-
 
 getInterval <- function(input, dataset) {
   options(warn = -1)
-  library(biomaRt)
   ensembl = biomaRt::useEnsembl(biomart = "ensembl",
                                 dataset = dataset,
                                 verbose = FALSE)
@@ -1066,7 +1032,7 @@ getInterval <- function(input, dataset) {
       filters = c("external_gene_name"),
       values = df,
       mart = ensembl,
-      verbose = T,
+      verbose = FALSE,
       useCache = FALSE
     )
 

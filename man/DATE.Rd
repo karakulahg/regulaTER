@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 %%  ~~function to do ... ~~
-Identify Enrichment of Repeat Elements in Proximity of Differentially Expressed Genes
+DEG Associated Transposable Elements - Identify Enrichment of Repeat Elements in Proximity of Differentially Expressed Genes
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~

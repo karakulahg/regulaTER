@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
 %%  ~~function to do ... ~~
-Calculate Enrichment of Repeats Associated with Genomic Peak Regions
+Transposable Elements in Accessible Regions - Calculate Enrichment of Repeats Associated with Genomic Peak Regions
 }
 \description{
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
@@ -16,7 +16,7 @@ TEAR(inputPeakFile, pathList, numberOfShuffle = 1, repeatMaskerFile, format, alt
 \arguments{
   \item{inputPeakFile}{
 %%     ~~Describe \code{inputPeakFile} here~~
-GRanges object of peak information in one of narrowPeak, broadPeak, or summits file formats, annotated via ChIPseeker and read using the readPeakFile function, with a minimum of seqnames, ranges, strand required columns, as well as summit and annotation columns.
+GRanges object of peak information in one of narrowPeak, broadPeak, or summits file formats, annotated via ChIPseeker and read using the readPeakFile function, with a minimum of seqnames, ranges, strand required columns, as well as summit (for narrowPeak only) and annotation columns.
 }
   \item{pathList}{
 %%     ~~Describe \code{pathList} here~~

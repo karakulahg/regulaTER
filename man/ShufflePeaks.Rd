@@ -17,7 +17,7 @@ ShufflePeaks(peakFile, pathList, seed = 0)
 \arguments{
   \item{peakFile}{
 %%     ~~Describe \code{peakFile} here~~
-GRanges object of peak information in one of narrowPeak, broadPeak, or summits file formats, annotated via ChIPseeker and read using the readPeakFile function, with a minimum of seqnames, ranges, strand required columns, as well as summit and annotation columns.
+GRanges object of peak information in one of narrowPeak, broadPeak, or summits file formats, annotated via ChIPseeker and read using the readPeakFile function, with a minimum of seqnames, ranges, strand required columns, as well as summit (for narrowPeak format files only) and annotation columns.
 }
   \item{pathList}{
 %%     ~~Describe \code{pathList} here~~
@@ -34,7 +34,7 @@ ChIPseeker annotations are divided into seven major classes. Promoter regions ar
 
 In the current version of regulaTER, the complement intervals of the regions must be provided for each object in the list. They use the same format as the obtained BED files, but cover all genomic regions not found in the category. The user can generate these files using another genome arithmetic tool, such as bedtools complement (-i <BED> -g <genome>), available on the [bedtools Suite](https://bedtools.readthedocs.io/en/latest/index.html).
 
-For the UCSC human and mouse genome assemblies hg38, hg19, and mm10, the pre-generated genomic region files are available for download at LINK.
+For the UCSC human and mouse genome assemblies hg38, hg19, and mm10, the pre-generated region files are available for download via the GitHub repository [regulaTER-regions](https://github.com/karakulahg/regulaTER-regions).
 
 genomeSizePath points to a file with two columns, corresponding to chromosome name and size, delimited by tabs.
 }
