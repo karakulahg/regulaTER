@@ -44,7 +44,7 @@ integer identifying minimum number of observed peak - repeat associations to be 
 }
   \item{minoverlap}{
 %%     ~~Describe \code{minoverlap} here~~
-integer identifying minimum number of overlapping bases between "broad" peak and repeat intervals. Is not called if the format argument is "narrow" or "summit".
+long integer identifying minimum number of overlapping bases between "broad" peak and repeat intervals. Is not called if the format argument is "narrow" or "summit".
 }
 }
 \details{
