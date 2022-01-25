@@ -1,4 +1,4 @@
-# regulaTER: An R package for an R package for analysis of transposable elements in accessible regions
+# regulaTER: an R package for analysis of transposable elements in accessible regions
 This repo is currently under review. Citation information will be provided as soon as our work is accepted. 
 ### What is this package used for? 
 This package is used for analysis of repeat elements in the genome, more specifically transposable elements, and their association with accessible chromatin and gene expression regulatory elements. As input, it requires DNA accessibility data, such as that produced by ATAC-seq, and analyzed by an appropriate pipeline, a RepeatMasker file including information for genomic repeats, BED files describing the gene-related contexts of all genomic regions, and a list of differentially expressed genes in condition of choice compared to controls and their genomic coordinates.
@@ -34,7 +34,6 @@ library(regulaTER)
 library(biomartr)
 library(GenomicRanges)
 library(dplyr)
-library(valr)
 library(biomaRt)
 library(marge)
 library(ChIPseeker)
@@ -68,29 +67,30 @@ pathList <- list("Promoter" = "../test_regulaTER/hg38/hg38_regions/hg38_regions/
 
 
 ```
-4. With the previously generated peak file and repeat masker objects, as well as the list of file paths to BED files defining genomic regions and the file with chromosome sizes, calculate the fold enrichment and p-values of repeat elements associated with input peak regions. If a broadPeak file is used, the format should be changed as "broad", and minoverlap should be given an integer value, defining how many minimum bases should a peak and a repeat element overlap before they are considered associated. Higher shuffle numbers give better results, but increase operation time.
+4. With the previously generated peak file and repeat masker objects, as well as the list of file paths to BED files defining genomic regions and the file with chromosome sizes, calculate the fold enrichment and p-values of repeat elements associated with input peak regions (Transposable Elements in Accessible Regions - TEAR). If a broadPeak file is used, the format should be changed as "broad", and minoverlap should be given an integer value, defining how many minimum bases should a peak and a repeat element overlap before they are considered associated. Higher shuffle numbers give better results, but increase operation time.
 ```
 
-enrich.peak <- TEAR(inputPeakFile = peak , pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = raw.rmsk, format="narrow", minoverlap=0L, minobserved = 10, alternative = "greater")
+enrich.peak <- TEAR(inputPeakFile = peak, pathList = pathList, numberOfShuffle = 2, repeatMaskerFile = raw.rmsk, format="narrow", minoverlap=0L, alternative = "greater", minobserved = 10)
 
 ```
 
-5. Using the TEAR results, the peak file and repeat masker objects used as the input for TEAR, and a user provided data frame of differentially expressed genes and their genomic intervals (such as those obtained from ensembl's BioMart or UCSC's Genome Browser), the structure of which is described under the function documentation, calculate the fold enrichment and p-values of accessible region enriched repeat elements located in input promoter regions. Higher shuffle numbers give better results, but increase operation time. Distance value defines desired length of promoter region from transcription start site. Longer distances cover more distal regulatory elements, but reduce precision of results.
+5. Using the results of the TEAR function, the peak file and repeat masker objects used as the input for TEAR, and a user provided data frame of differentially expressed genes and their genomic intervals (such as those obtained from ensembl's BioMart or UCSC's Genome Browser), the structure of which is described under the function documentation, calculate the fold enrichment and p-values of accessible region enriched repeat elements located in input promoter regions (DEG Associated Transposable Elements - DATE). Higher shuffle numbers give better results, but increase operation time. Distance value defines desired length of promoter region from transcription start site. Longer distances cover more distal regulatory elements, but reduce precision of results.
 ```
+
 # use getInterval to generate interval ranges from gene list
-input <- "~/Desktop/ibg/test_ToolX/ToolX-inputs/DE_genenames.txt"
+input <- "DE_genenames.txt"
 dataset <- "hsapiens_gene_ensembl"
 
 genes <- regulaTER::getInterval(input, dataset)
 
-result100 <- DATE(enrichTEARResult = enrich.peak, peaks = peak, rmsk = raw.rmsk, genes = genes, numberOfShuffle = 2, minobserved = 10, distance = 100000, alternative = "greater")
+IdDEGRepeats <- DATE(enrichTEARResult = enrich.peak, peaks = peak, rmsk = raw.rmsk, genes = genes, alternative = "greater" ,numberOfShuffle = 2, minobserved = 10, distance = 100000)
 
 ```
 
 6. Using the output of DATE, as well as the peak, repeat masker, and genes object used in the same function, identify which genomic motifs are enriched in promoter associated PARs. This function requires a local installation of HOMER, available on the [HOMER website](http://homer.ucsd.edu/homer/).
 
 ```
-FindMotifs(df = result100, repeatMaskerFile = raw.rmsk, peak = peak, distance = 100000, genes = genes, genome = "hg38", outDir = "../test/", homerPath = "~/Downloads/Tools/homer/", type = "linkedRepeats", numberOfMotifs = T)
+FindMotifs(df = IdDEGRepeats, repeatMaskerFile = raw.rmsk, peak = peak, distance = 100000, genes = genes, genome = "hg38", outDir = "../test/", homerPath = "~/Downloads/Tools/homer/", type = "linkedRepeats", topRepeats = T)
 
 ```
 
