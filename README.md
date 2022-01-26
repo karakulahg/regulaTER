@@ -8,7 +8,7 @@
 
 
 
-<p>. This repo is currently under review. Citation information will be provided as soon as our work is accepted.</p>
+<p>This repo is currently under review. Citation information will be provided as soon as our work is accepted.</p>
 <div id="what-is-this-package-used-for" class="section level3">
 <h3>What is this package used for?</h3>
 <p>This package is used for analysis of repeat elements in the genome, more specifically transposable elements, and their association with accessible chromatin and gene expression regulatory elements. As input, it is optimized for DNA accessibility data, such as that produced by ATAC-seq, and analyzed by an appropriate pipeline, a RepeatMasker file including information for genomic repeats, BED files describing the gene-related contexts of all genomic regions, and a list of differentially expressed genes in condition of choice compared to controls and their genomic coordinates. It can also be used with non-accessibility genomic DNA sequencing data, such as histone ChIP-seq, with minimal modifications.</p>
