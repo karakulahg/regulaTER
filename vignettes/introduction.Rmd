@@ -122,17 +122,31 @@ IdDEGRepeats <- DATE(enrichTEARResult = enrich.peak, peaks = peak, rmsk = raw.rm
 head(IdDEGRepeats[order(IdDEGRepeats$p.adjust.value), ])
 ```
 
-6. Using the output of the DATE function, as well as the peak, repeat masker, and genes object used in the same function, identify which genomic motifs are enriched in promoter associated TEAR regions. This function requires a local installation of HOMER, available on the [HOMER website](http://homer.ucsd.edu/homer/).
+6. Using the output of the DATE function, as well as the peak, repeat masker, and genes object used in the same function, identify which genomic motifs are enriched in promoter associated TEAR regions. This function requires a local installation of HOMER, available on the [HOMER website](http://homer.ucsd.edu/homer/). In case the marge API has difficulty locating HOMER tools, refer to the [marge repository](https://github.com/robertamezquita/marge).
 
 ```{r, eval = FALSE}
-FindMotifs(df = IdDEGRepeats, repeatMaskerFile = raw.rmsk, peak = peak, distance = 100000, genes = genes, genome = "hg38", outDir = "../test/", homerPath = "~/Downloads/Tools/homer/", type = "linkedRepeats", topRepeats = T)
+
+check_homer()
+
+get_homer_bin()
+
+# replace the homerPath argument with the output of get_homer_bin, removing the "/bin/" suffix at the end
+
+FindMotifs(df = IdDEGRepeats, repeatMaskerFile = raw.rmsk, peak = peak, distance = 100000, genes = genes, genome = "hg38", outDir = "../test/", homerPath = "~/path/to/homer/./", type = "linkedRepeats", topRepeats = T)
 ```
 
 Alternately, the repeatName object in the output of TEAR can be provided instead of the output of DATE. In this case, the distance and genes parameters can be omitted.
 
 ```{r, eval = FALSE}
-FindMotifs(df = enrich.peak$RepeatName, repeatMaskerFile = raw.rmsk, peak = peak, genome = "hg38", outDir = "../test/", homerPath = "~/Downloads/Tools/homer/", type = "enrichPeak", topRepeats = T)
+FindMotifs(df = enrich.peak$RepeatName, repeatMaskerFile = raw.rmsk, peak = peak, genome = "hg38", outDir = "../test/", homerPath = "~/path/to/homer/./", type = "enrichPeak", topRepeats = T)
 ```
+
+7. Using the output of the TEAR function, generate exploratory plots of accessible repeat regions and place them in a directory of choice. For larger datasets, increase the width and height 
+
+```{r, eval = FALSE}
+MakePlots(enrich.peak "~/output/directory", width = 4, height = 4)
+```
+
 
 ### Analysis of broadPeak and summits files
 

@@ -1,11 +1,10 @@
 Package: regulaTER
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Analysis of Transposable Elements in Accessible Genomic Regions
 Version: 0.1.0
 Author: Who wrote it
 Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: Performs analysis of transposable element contributions to accessible regions and gene expression.
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
