@@ -144,7 +144,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>. This repo is currently under review. Citation information will be provided as soon as our work is accepted.</p>
 <div id="what-is-this-package-used-for" class="section level3">
 <h3>What is this package used for?</h3>
-<p>This package is used for analysis of repeat elements in the genome, more specifically transposable elements, and their association with accessible chromatin and gene expression regulatory elements. As input, it requires DNA accessibility data, such as that produced by ATAC-seq, and analyzed by an appropriate pipeline, a RepeatMasker file including information for genomic repeats, BED files describing the gene-related contexts of all genomic regions, and a list of differentially expressed genes in condition of choice compared to controls and their genomic coordinates.</p>
+<p>This package is used for analysis of repeat elements in the genome, more specifically transposable elements, and their association with accessible chromatin and gene expression regulatory elements. As input, it is optimized for DNA accessibility data, such as that produced by ATAC-seq, and analyzed by an appropriate pipeline, a RepeatMasker file including information for genomic repeats, BED files describing the gene-related contexts of all genomic regions, and a list of differentially expressed genes in condition of choice compared to controls and their genomic coordinates. It can also be used with non-accessibility genomic DNA sequencing data, such as histone ChIP-seq, with minimal modifications.</p>
 <div id="what-are-the-dependencies-for-regulater" class="section level4">
 <h4>What are the dependencies for regulaTER ?</h4>
 <ol style="list-style-type: decimal">
@@ -206,7 +206,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; #   matching_class &lt;chr&gt;, no_bp_in_complement &lt;chr&gt;, in_repeat_start &lt;chr&gt;,</span></span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; #   in_repeat_end &lt;chr&gt;, qry_width &lt;int&gt;</span></span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>peak <span class="ot">&lt;-</span><span class="fu">readPeakFile</span>(<span class="st">&quot;Annotated_FinalPeakList.narrowPeak.filt.tsv&quot;</span>)</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>peak <span class="ot">&lt;-</span><span class="fu">readPeakFile</span>(<span class="st">&quot;Annotated_Peaks.narrowPeak.tsv&quot;</span>)</span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># explicitly identify the column stating the distance of the summit nucleotide from the peak start nucleotide (for narrowPeak files only)</span></span>
 <span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(<span class="fu">mcols</span>(peak))[<span class="dv">8</span>] <span class="ot">&lt;-</span> <span class="st">&quot;summit&quot;</span></span>
@@ -313,7 +313,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <li>Using the output of the DATE function, as well as the peak, repeat masker, and genes object used in the same function, identify which genomic motifs are enriched in promoter associated TEAR regions. This function requires a local installation of HOMER, available on the <a href="http://homer.ucsd.edu/homer/">HOMER website</a>.</li>
 </ol>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">FindMotifs</span>(<span class="at">df =</span> IdDEGRepeats, <span class="at">repeatMaskerFile =</span> raw.rmsk, <span class="at">peak =</span> peak, <span class="at">distance =</span> <span class="dv">100000</span>, <span class="at">genes =</span> genes, <span class="at">genome =</span> <span class="st">&quot;hg38&quot;</span>, <span class="at">outDir =</span> <span class="st">&quot;../test/&quot;</span>, <span class="at">homerPath =</span> <span class="st">&quot;~/homer/&quot;</span>, <span class="at">type =</span> <span class="st">&quot;linkedRepeats&quot;</span>, <span class="at">topRepeats =</span> T)</span></code></pre></div>
-<p>Alternately, the repeatName object in the output of TEAR can be provided instead of the output of DATE. In this case, the distance and genes parameters can be omitted.</p>
+<p>Alternately, the repeatName object in the output of TEAR can be provided instead of the output of DATE, such as when analyzing genomic motifs found in accessible repeat regions independently of their contribution to gene expression. In this case, the distance and genes parameters can be omitted.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">FindMotifs</span>(<span class="at">df =</span> enrich.peak<span class="sc">$</span>RepeatName, <span class="at">repeatMaskerFile =</span> raw.rmsk, <span class="at">peak =</span> peak, <span class="at">genome =</span> <span class="st">&quot;hg38&quot;</span>, <span class="at">outDir =</span> <span class="st">&quot;../test/&quot;</span>, <span class="at">homerPath =</span> <span class="st">&quot;~/Downloads/Tools/homer/&quot;</span>, <span class="at">type =</span> <span class="st">&quot;enrichPeak&quot;</span>, <span class="at">topRepeats =</span> T)</span></code></pre></div>
 </div>
 <div id="analysis-of-broadpeak-and-summits-files" class="section level3">
@@ -336,7 +336,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; #   matching_class &lt;chr&gt;, no_bp_in_complement &lt;chr&gt;, in_repeat_start &lt;chr&gt;,</span></span>
 <span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; #   in_repeat_end &lt;chr&gt;, qry_width &lt;int&gt;</span></span>
 <span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>peak <span class="ot">&lt;-</span><span class="fu">readPeakFile</span>(<span class="st">&quot;Annotated_Vehicle_K27Ac_IP-S1_R1_peaks.broadPeak.tsv&quot;</span>)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>peak <span class="ot">&lt;-</span><span class="fu">readPeakFile</span>(<span class="st">&quot;Annotated_H3K27Ac_peaks.broadPeak.tsv&quot;</span>)</span>
 <span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(peak)</span>
 <span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; GRanges object with 6 ranges and 15 metadata columns:</span></span>
@@ -350,12 +350,12 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [6]     chr1 3028186-3028609      * |       425        *</span></span>
 <span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                  V4        V5        V7        V8        V9</span></span>
 <span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                            &lt;factor&gt; &lt;integer&gt; &lt;numeric&gt; &lt;numeric&gt; &lt;numeric&gt;</span></span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [1] Vehicle_K27Ac_IP-S1_R1_peak_1        18   1.74877   1.87941         0</span></span>
-<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [2] Vehicle_K27Ac_IP-S1_R1_peak_2        21   1.81713   2.12406         0</span></span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [3] Vehicle_K27Ac_IP-S1_R1_peak_3        21   1.81713   2.12406         0</span></span>
-<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [4] Vehicle_K27Ac_IP-S1_R1_peak_4        13   1.54366   1.36369         0</span></span>
-<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [5] Vehicle_K27Ac_IP-S1_R1_peak_5        12   1.67066   1.27923         0</span></span>
-<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [6] Vehicle_K27Ac_IP-S1_R1_peak_6        13   1.53074   1.33756         0</span></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [1] H3K27Ac_peak_1        18   1.74877   1.87941         0</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [2] H3K27Ac_peak_2        21   1.81713   2.12406         0</span></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [3] H3K27Ac_peak_3        21   1.81713   2.12406         0</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [4] H3K27Ac_peak_4        13   1.54366   1.36369         0</span></span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [5] H3K27Ac_peak_5        12   1.67066   1.27923         0</span></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [6] H3K27Ac_peak_6        13   1.53074   1.33756         0</span></span>
 <span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;              annotation   geneChr geneStart   geneEnd geneLength geneStrand</span></span>
 <span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                &lt;factor&gt; &lt;integer&gt; &lt;integer&gt; &lt;integer&gt;  &lt;integer&gt;  &lt;integer&gt;</span></span>
 <span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   [1] Distal Intergenic         1   3214482   3671498     457017          2</span></span>

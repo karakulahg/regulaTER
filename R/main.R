@@ -539,8 +539,8 @@ TEAR <-
       )
     all.RepeatName$obsOnTrueMean <-
       all.RepeatName$observed / all.RepeatName$TrueMean
-    all.RepeatName$p.value[all.RepeatName$observed <= minobserved] <- NA
-    all.RepeatName$p.adjust.value[all.RepeatName$observed <= minobserved] <- NA
+    all.RepeatName$p.value[all.RepeatName$observed < minobserved] <- NA
+    all.RepeatName$p.adjust.value[all.RepeatName$observed < minobserved] <- NA
 
     b.rFamily <-
       mapply(
@@ -558,8 +558,8 @@ TEAR <-
       )
     all.RepeatFamily$obsOnTrueMean <-
       all.RepeatFamily$observed / all.RepeatFamily$TrueMean
-    all.RepeatFamily$p.value[all.RepeatFamily$observed <= minobserved] <- NA
-    all.RepeatFamily$p.adjust.value[all.RepeatFamily$observed <= minobserved] <-
+    all.RepeatFamily$p.value[all.RepeatFamily$observed < minobserved] <- NA
+    all.RepeatFamily$p.adjust.value[all.RepeatFamily$observed < minobserved] <-
       NA
 
     b.rType <-
@@ -578,8 +578,8 @@ TEAR <-
       )
     all.RepeatType$obsOnTrueMean <-
       all.RepeatType$observed / all.RepeatType$TrueMean
-    all.RepeatType$p.value[all.RepeatType$observed <= minobserved] <- NA
-    all.RepeatType$p.adjust.value[all.RepeatType$observed <= minobserved] <- NA
+    all.RepeatType$p.value[all.RepeatType$observed < minobserved] <- NA
+    all.RepeatType$p.adjust.value[all.RepeatType$observed < minobserved] <- NA
 
     # to sort results as p-adjust values
     all.RepeatName <-
@@ -965,8 +965,8 @@ all.RepeatName$p.adjust.value <-
 all.RepeatName <-
   all.RepeatName[order(all.RepeatName$p.adjust.value), ]
 
-all.RepeatName$p.value[all.RepeatName$observed <= minobserved] <- NA
-all.RepeatName$p.adjust.value[all.RepeatName$observed <= minobserved] <- NA
+all.RepeatName$p.value[all.RepeatName$observed < minobserved] <- NA
+all.RepeatName$p.adjust.value[all.RepeatName$observed < minobserved] <- NA
 
 return(all.RepeatName)
 }
