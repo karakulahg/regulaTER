@@ -31,6 +31,7 @@ This package is used for analysis of repeat elements in the genome, more specifi
     - [GenomicRanges](https://bioconductor.org/packages/release/bioc/html/GenomicRanges.html)
     - [biomartr](https://cran.r-project.org/web/packages/biomartr/readme/README.html)
     - [marge](https://robertamezquita.github.io/marge/index.html)
+    - [ggplot2](https://ggplot2.tidyverse.org/)
 
 
 ### How to install this R package ?
@@ -57,6 +58,7 @@ library(dplyr)
 library(biomaRt)
 library(marge)
 library(ChIPseeker)
+library(ggplot2)
   
 })
 
@@ -144,7 +146,7 @@ FindMotifs(df = enrich.peak$RepeatName, repeatMaskerFile = raw.rmsk, peak = peak
 7. Using the output of the TEAR function, generate exploratory plots of accessible repeat regions and place them in a directory of choice. For larger datasets, increase the width and height 
 
 ```{r, eval = FALSE}
-MakePlots(enrich.peak "~/output/directory", width = 4, height = 4)
+MakePlots(enrich.peak, "~/output/directory", width = 4, height = 4)
 ```
 
 
