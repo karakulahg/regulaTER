@@ -125,7 +125,7 @@ GetOverlap <-
 
     #### finds repeat ranges with overlapping summits ####
 
-    if (format == "braod") {
+    if (format == "broad") {
 
       m <-
         GenomicRanges::findOverlaps(gr.rmsk,
@@ -675,7 +675,8 @@ calculate_background_linkedRepeats <-
            repeatMaskerFile,
            peakFile,
            genes,
-           distance) {
+           distance,
+           format) {
     options(warn = -1)
     df <- df[which(df$p.adjust.value <= 0.05 & df$observed >= 10), ]
 
@@ -688,7 +689,7 @@ calculate_background_linkedRepeats <-
       row.names(matched.rmsk) # for homer unique identifier
 
     gr.rmsk.par <- GetOverlap(matched.rmsk,
-                              peakFile, format = "narrow")
+                              peakFile, format = format)
 
     gr.matched.rmsk <- MakeGrangeObj(matched.rmsk)
 
@@ -719,6 +720,7 @@ FindMotifs <-
            outDir,
            homerPath,
            type,
+           format = "narrow",
            topRepeats = TRUE) {
     options(warn = -1)
     library(marge)
@@ -751,7 +753,7 @@ FindMotifs <-
       }
     } else if (type == "linkedRepeats") {
       list <-
-        calculate_background_linkedRepeats(df, repeatMaskerFile, peak, genes, distance)
+        calculate_background_linkedRepeats(df, repeatMaskerFile, peak, genes, distance, format)
       queries <- list$Query
       queries <- queries[, c(1:3, 9, 4:8)]
       backgrounds <- list$Background
@@ -789,7 +791,9 @@ DATE <-
            alternative = "greater",
            minobserved = 0,
            numberOfShuffle = 100,
-           distance = 100000) {
+           regionSelection = "gene",
+           distance = 100000,
+           format = "narrow") {
     options(warn = -1, echo = FALSE)
     count <- enrichTEARResult
 
@@ -804,17 +808,25 @@ DATE <-
     overlapped <-
       GetOverlap(rmsk = rmsk,
                  gr.input = gr.input,
-                 format = "narrow")
+                 format = format)
     # get overlapped has repeat names matched in enrich results
     repeats.overlapped <-
       subset(overlapped, RepeatName %in% repeatList$RepeatName)
 
     # find overlapped results nearest to given genes
-    d <-
-      distanceToNearest(x = repeats.overlapped, subject = MakeGrangeObj(genes))
+    if (regionSelection == "gene") {
+      d <-
+        distanceToNearest(x = repeats.overlapped, subject = MakeGrangeObj(genes))
 
-    m <- d[which(elementMetadata(d)$distance < distance),]
-    result.overlapped <- repeats.overlapped[queryHits(m)]
+      m <- d[which(elementMetadata(d)$distance < distance),]
+      result.overlapped <- repeats.overlapped[queryHits(m)]
+    }
+    else if (regionSelection == "promoter") {
+      p <- promoters(MakeGrangeObj(genes), upstream = distance)
+      d <-
+        findOverlaps(query = repeats.overlapped, subject = p)
+      result.overlapped <- repeats.overlapped[unique(queryHits(d))]
+    }
 
     # calculate repeats counts related genes
     observed.counts <- CountElements(result.overlapped, rmsk)[[1]]
@@ -834,10 +846,18 @@ DATE <-
           gr.nonPAR[gr.nonPAR$repeat_name == repeatList$RepeatName[i]]
          part.nonPAR <-
           temp.nonPAR[sample(length(temp.nonPAR), repeatList$observed[i]),]
+        if (regionSelection == "gene") {
         d <-
           distanceToNearest(x = part.nonPAR, subject = MakeGrangeObj(genes))
         m <- d[which(elementMetadata(d)$distance < distance),]
         part.nonPAR <- part.nonPAR[queryHits(m)]
+        }
+        else if (regionSelection == "promoter") {
+          p <- promoters(MakeGrangeObj(genes), upstream = distance)
+          d <-
+            findOverlaps(query = part.nonPAR, subject = p)
+          part.nonPAR <- part.nonPAR[unique(queryHits(d))]
+        }
 
         if (length(part.nonPAR) != 0) {
           elementMetadata(part.nonPAR)$target <-
@@ -882,10 +902,18 @@ DATE <-
             gr.nonPAR[gr.nonPAR$repeat_name == repeatList$RepeatName[j]]
           tmp.nonPAR <-
             temp.nonPAR[sample(length(temp.nonPAR), repeatList$observed[j]),]
+          if (regionSelection == "gene") {
           d <-
             distanceToNearest(x = tmp.nonPAR, subject = MakeGrangeObj(genes))
           m <- d[which(elementMetadata(d)$distance < distance),]
           tmp.nonPAR <- tmp.nonPAR[queryHits(m)]
+          }
+          else if (regionSelection == "promoter") {
+            p <- promoters(MakeGrangeObj(genes), upstream = distance)
+            d <-
+              findOverlaps(query = tmp.nonPAR, subject = p)
+            tmp.nonPAR <- tmp.nonPAR[unique(queryHits(d))]
+          }
           if (length(tmp.nonPAR) != 0) {
             elementMetadata(tmp.nonPAR)$target <-
               as.character(repeatList$RepeatName[j])
