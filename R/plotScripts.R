@@ -54,13 +54,13 @@ MakePlotsRepeatName <- function(repeat.names, outDir, width, height){
       ggplot(repeat.names.sub[repeat.names.sub$is.significant == TRUE,], aes(x = RepeatName, group = 1)) +
         geom_col(aes(y = observed)) + geom_line(aes(y = (observed / rmsk) / coeff)) + theme_light() + labs(x = "Repeat Name") +
         scale_y_continuous(name = "Observed Repeats", sec.axis = sec_axis( ~ . * coeff, name = "Ratio of Observed Repeats")) +
-        theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
+        theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
 
 
       # ggplot(repeat.names.sub[repeat.names.sub$is.significant == TRUE,], aes(x = RepeatName, group = 1)) +
       #   geom_col(fill = "#253494",aes(y = observed)) + geom_line(color = "#737373",aes(y = (observed / rmsk) / coeff)) + theme_classic() + labs(x = "Repeat Name") +
       #   scale_y_continuous(name = "Observed Repeats", sec.axis = sec_axis( ~ . * coeff, name = "Ratio of Observed Repeats")) +
-      #   theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
+      #   theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
 
 
       # plots the peak contribution plot
@@ -122,12 +122,12 @@ MakePlotsRepeatType <- function(repeat.types, outDir, width, height){
       ggplot(repeat.types.sub[repeat.types.sub$is.significant == TRUE,], aes(x = RepeatType, group = 1)) + geom_col(aes(y = observed)) +
         geom_line(aes(y = (observed / rmsk) / coeff)) + theme_light() + labs(x = "Repeat Name") +
         scale_y_continuous(name = "Observed Repeats", sec.axis = sec_axis( ~ . * coeff, name = "Ratio of Observed Repeats")) +
-        theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
+        theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
 
       # ggplot(repeat.types.sub.2[repeat.types.sub.2$is.significant == TRUE,], aes(x = RepeatType, group = 1)) +
       #   geom_col(fill = "#253494",aes(y = observed)) + geom_line(color = "#737373",aes(y = (observed / rmsk) / coeff)) + theme_classic() + labs(x = "Repeat Type") +
       #   scale_y_continuous(name = "Observed Repeats", sec.axis = sec_axis( ~ . * coeff, name = "Ratio of Observed Repeats")) +
-      #   theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
+      #   theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
 
 
 
@@ -190,13 +190,13 @@ MakePlotsRepeatFamily <- function(repeat.families, outDir, width, height){
       ggplot(repeat.families.sub[repeat.families.sub$is.significant == TRUE,], aes(x = RepeatFamily, group = 1)) + geom_col(aes(y = observed)) +
         geom_line(aes(y = (observed / rmsk) / coeff)) + theme_light() + labs(x = "Repeat Name") +
         scale_y_continuous(name = "Observed Repeats",sec.axis = sec_axis( ~ . * coeff, name = "Ratio of Observed Repeats")) +
-        theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
+        theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
 
 
       # ggplot(repeat.families.sub.2[repeat.families.sub.2$is.significant == TRUE,], aes(x = RepeatFamily, group = 1)) +
       #   geom_col(fill = "#253494",aes(y = observed)) + geom_line(color = "#737373",aes(y = (observed / rmsk) / coeff)) + theme_classic() + labs(x = "Repeat Family") +
       #   scale_y_continuous(name = "Observed Repeats", sec.axis = sec_axis( ~ . * coeff, name = "Ratio of Observed Repeats")) +
-      #   theme(axis.text.x = element_text(angle = 45, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
+      #   theme(axis.text.x = element_text(angle = 90, hjust = 0.5, vjust = 0.7)) + theme(axis.text=element_text(size=6))
 
 
 

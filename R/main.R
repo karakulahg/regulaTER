@@ -61,13 +61,13 @@ FormattingRM <- function(rmsk, goal = "base") {
 CountRM <- function(rmsk) {
   options(warn = -1)
   library(dplyr)
-  x <- rmsk %>% count(repeat_name)
+  x <- rmsk %>% dplyr::count(repeat_name)
   colnames(x) <- c("RepeatName", "nRepeatName")
 
-  x1 <- rmsk %>% count(repeat_type)
+  x1 <- rmsk %>% dplyr::count(repeat_type)
   colnames(x1) <- c("RepeatType", "nRepeatType")
 
-  x2 <- rmsk %>% count(repeat_family)
+  x2 <- rmsk %>% dplyr::count(repeat_family)
   colnames(x2) <- c("RepeatFamily", "nRepeatFamily")
 
   rmsk.counts <- list(x, x2, x1)
@@ -164,12 +164,12 @@ CountElements <- function(gr.rmsk.matched, rmsk) {
     setdiff(rmsk$repeat_type, df.rmsk.matched$RepeatType)
 
   library(dplyr)
-  x <- df.rmsk.matched %>% count(RepeatName)
+  x <- df.rmsk.matched %>% dplyr::count(RepeatName)
   colnames(x) <- c("RepeatName", "nRepeatName")
   x <-
     rbind(x, data.frame(RepeatName = diff.rName, nRepeatName = rep.int(0, length(diff.rName))))
 
-  x1 <- df.rmsk.matched %>% count(RepeatFamily)
+  x1 <- df.rmsk.matched %>% dplyr::count(RepeatFamily)
   colnames(x1) <- c("RepeatFamily", "nRepeatFamily")
   x1 <-
     rbind(x1,
@@ -178,7 +178,7 @@ CountElements <- function(gr.rmsk.matched, rmsk) {
             nRepeatFamily = rep.int(0, length(diff.rFamily))
           ))
 
-  x2 <- df.rmsk.matched %>% count(RepeatType)
+  x2 <- df.rmsk.matched %>% dplyr::count(RepeatType)
   colnames(x2) <- c("RepeatType", "nRepeatType")
   x2 <-
     rbind(x2,
@@ -643,6 +643,7 @@ calculate_background_par <-
   function(df, repeatMaskerFile, peakFile) {
     options(warn = -1)
     df <- df[which(df$p.adjust.value <= 0.05 & df$observed >= 10), ]
+    df <- df[order(df$p.adjust.value), ]
 
     rmsk <- FormattingRM(repeatMaskerFile)
 
@@ -663,7 +664,8 @@ calculate_background_par <-
 
     list <-
       list("Query" = as.data.frame(gr.rmsk.par)[, c(1, 2, 3, 4, 5, 6, 7, 8, 11)],
-           "Background" = as.data.frame(gr.nonPAR))
+           "Background" = as.data.frame(gr.nonPAR),
+           "Names" = df$RepeatName)
 
     return(list)
 
@@ -679,6 +681,7 @@ calculate_background_linkedRepeats <-
            format) {
     options(warn = -1)
     df <- df[which(df$p.adjust.value <= 0.05 & df$observed >= 10), ]
+    df <- df[order(df$p.adjust.value), ]
 
     rmsk <- FormattingRM(repeatMaskerFile)
 
@@ -703,7 +706,8 @@ calculate_background_linkedRepeats <-
 
     list <-
       list("Query" = as.data.frame(queries),
-           "Background" = as.data.frame(backgrounds))
+           "Background" = as.data.frame(backgrounds),
+           "Names" = df$RepeatName)
 
     return(list)
 
@@ -733,7 +737,7 @@ FindMotifs <-
       queries <- queries[, c(1:3, 9, 4:8)]
       backgrounds <- list$Background
       backgrounds <- backgrounds[, c(1:3, 9, 4:8)]
-      Rnames <-  unique(queries$repeat_name)
+      Rnames <-  unique(list$Names)
       if(topRepeats){
         Rnames <-  Rnames[1:10]
       }
@@ -758,7 +762,7 @@ FindMotifs <-
       queries <- queries[, c(1:3, 9, 4:8)]
       backgrounds <- list$Background
       backgrounds <- backgrounds[, c(1:3, 9, 4:8)]
-      Rnames <-  unique(queries$repeat_name)
+      Rnames <-  unique(list$Names)
       if(topRepeats){
         Rnames <-  Rnames[1:10]
       }
@@ -885,7 +889,7 @@ DATE <-
     library(dplyr)
     x <- data.frame()
     if (nrow(df.nonPAR) != 0) {
-      x <- df.nonPAR %>% count(target)
+      x <- df.nonPAR %>% dplyr::count(target)
       colnames(x) <- c("RepeatName", "nRepeatName")
     }
 
@@ -937,7 +941,7 @@ DATE <-
       diff.rName <- setdiff(rmsk$repeat_name, df.nonPAR$target)
       x <- data.frame()
       if (nrow(df.nonPAR) != 0) {
-        x <- df.nonPAR %>% count(target)
+        x <- df.nonPAR %>% dplyr::count(target)
         colnames(x) <- c("RepeatName", "nRepeatName")
       }
       tmp <-
